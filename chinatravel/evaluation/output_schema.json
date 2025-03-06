@@ -1,0 +1,160 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "people_number": {
+      "type": "integer"
+    },
+    "start_city": {
+      "type": "string"
+    },
+    "target_city": {
+      "type": "string"
+    },
+    "itinerary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "integer"
+          },
+          "activities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["airplane", "attraction", "lunch", "dinner", "breakfast", "accommodation", "train"]
+                },
+                "start_time": {
+                  "type": "string",
+                  "pattern": "^\\d{2}:\\d{2}$"
+                },
+                "end_time": {
+                  "type": "string",
+                  "pattern": "^\\d{2}:\\d{2}$"
+                },
+                "cost": {
+                  "type": "number"
+                },
+                "tickets": {
+                  "type": "integer"
+                },
+                "position": {
+                  "type": "string"
+                },
+                "transport": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string"
+                      },
+                      "end": {
+                        "type": "string"
+                      },
+                      "mode": {
+                        "type": "string",
+                        "enum": ["walk", "metro", "car"]
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "pattern": "^\\d{2}:\\d{2}$"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "pattern": "^\\d{2}:\\d{2}$"
+                      },
+                      "cost": {
+                        "type": "number"
+                      },
+                      "distance": {
+                        "type": "number"
+                      },
+                      "tickets": {
+                        "type": "integer"
+                      }
+                    },
+                    "required": [
+                      "start",
+                      "end",
+                      "mode",
+                      "start_time",
+                      "end_time",
+                      "cost",
+                      "distance"
+                    ]
+                  }
+                },
+                "room_type": {
+                  "type": "integer"
+                },
+                "rooms": {
+                  "type": "integer"
+                },
+                "FlightID": {
+                  "type": "string"
+                },
+                "TrainID": {
+                  "type": "string"
+                },
+                "transports": {
+                  "type": "array"
+                }
+              },
+              "required": [
+                "type",
+                "start_time",
+                "end_time",
+                "cost"
+              ],
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "type": {
+                        "enum": ["airplane", "train"]
+                      }
+                    }
+                  },
+                  "then": {
+                    "required": ["start", "end"]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": { "type": { "const": "airplane" } }
+                  },
+                  "then": {
+                    "required": ["FlightID"]
+                  }
+                },
+                {
+                  "if": {
+                    "properties": { "type": { "const": "train" } }
+                  },
+                  "then": {
+                    "required": ["TrainID"]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "day",
+          "activities"
+        ]
+      }
+    }
+  },
+  "required": [
+    "people_number",
+    "start_city",
+    "target_city",
+    "itinerary"
+  ]
+}

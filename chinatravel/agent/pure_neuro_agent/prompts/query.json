@@ -1,0 +1,19 @@
+{
+    "start_city": "北京",
+    "target_city": "南京",
+    "hard_logic": [
+        "days==2",
+        "people_number==1",
+        "cost<=3000",
+        "tickets==1",
+        "rooms==1",
+        "transport_type<={'metro'}",
+        "{'江浙菜'} <= food_type",
+        "{'南京博物院'}<=attraction_names"
+    ],
+    "preference": {
+        "attraction": "历史景点",
+        "transport": "地铁"
+    },
+    "nature_language": "当前位置北京。我一个人想去南京玩2天，预算3000人民币，尽量多坐地铁，喜欢吃江浙菜，想去南京博物院，请给我一个旅行规划。"
+}
