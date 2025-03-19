@@ -11,11 +11,11 @@ if project_root_path not in sys.path:
 
 import json
 from chinatravel.environment.world_env import WorldEnv
-from chinatravel.evaluation.utils import AttractionsOODTag
+from chinatravel.evaluation.utils import Attractions
 
 from chinatravel.symbol_verification.preference import evaluate_preference_py
 env = WorldEnv()
-attractions = AttractionsOODTag()
+attractions = Attractions()
 goto = env.transportation.goto
 
 city_dict = {

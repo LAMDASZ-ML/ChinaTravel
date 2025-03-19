@@ -118,6 +118,11 @@ if __name__ == "__main__":
         if args.agent in ["ReAct", "Act"]:
             plan_log = agent(symbolic_input["nature_language"])
             plan = plan_log["ans"]
+            if isinstance(plan, str):
+                try:
+                    plan = json.loads(plan)
+                except:
+                    plan = plan
             log = plan_log["log"]
             save_json_file(
                 json_data=log, file_path=os.path.join(log_dir, f"{data_idx}.json")
