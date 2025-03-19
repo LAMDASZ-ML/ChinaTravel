@@ -83,9 +83,10 @@ def evaluate_commonsense_constraints(data_index, symbolic_input_dict, plan_json_
                 individual_succ += 1
                 pass_id.append(idx)
         except Exception as message:
-            print("Error: ", message)
-            print(symbolic_input)
-            print(plan_json)
+            pass
+            # print("Error: ", message)
+            # print(symbolic_input)
+            # print(plan_json)
         
                             
 
