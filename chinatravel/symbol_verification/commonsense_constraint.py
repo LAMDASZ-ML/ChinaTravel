@@ -456,16 +456,17 @@ def Is_hotels_correct(symbolic_input, plan_json, verbose=False):
             # "room_types=={1}",
             
             
-            limit_rooms, limits_room_type = False, False
+            # limit_rooms, limits_room_type = False, False
             
-            for logical_i in symbolic_input["hard_logic"]:
+            # for logical_i in symbolic_input["hard_logic"]:
 
-                if not isinstance(logical_i, str):
-                    continue
-                if "rooms" in logical_i:
-                    limit_rooms = True
-                if "room_type" in logical_i:
-                    limits_room_type = True
+            #     if not isinstance(logical_i, str):
+            #         continue
+            #     if "rooms" in logical_i:
+            #         limit_rooms = True
+            #     if "room_type" in logical_i:
+            #         limits_room_type = True
+            limit_rooms, limits_room_type = symbolic_input["limit_rooms"], symbolic_input["limits_room_type"]
 
             if limit_rooms and limits_room_type:
                 pass
@@ -473,11 +474,12 @@ def Is_hotels_correct(symbolic_input, plan_json, verbose=False):
                 room_type = activity_i["room_type"]
                 rooms = activity_i["rooms"]
                 # people_number = int(symbolic_input["hard_logic"][1].split("==")[1])
-                people_number_idx = 1
-                for i, l in enumerate(symbolic_input["hard_logic"]):
-                    if "people_number" in l:
-                        people_number_idx = i
-                people_number = int(symbolic_input["hard_logic"][people_number_idx].split("==")[1])
+                # people_number_idx = 1
+                # for i, l in enumerate(symbolic_input["hard_logic"]):
+                #     if "people_number" in l:
+                #         people_number_idx = i
+                # people_number = int(symbolic_input["hard_logic"][people_number_idx].split("==")[1])
+                people_number = symbolic_input["people_number"]
             
                 if (room_type * rooms >= people_number) and (room_type * rooms < people_number + room_type):
                     pass

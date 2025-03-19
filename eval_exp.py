@@ -136,17 +136,17 @@ if __name__ == "__main__":
         #         print("schema pass but commonsense fail: {}".format(passid))
         #         # print(result_data[method][passid])
 
-        print("Logical constraints (flat version):")
-        macro_logi, micro_logi, logi_result_agg, logi_pass_id_flat = evaluate_hard_constraints(
-            query_index, query_data, result_data[method], verbose=False
-        )
+        # print("Logical constraints (flat version):")
+        # macro_logi, micro_logi, logi_result_agg, logi_pass_id_flat = evaluate_hard_constraints(
+        #     query_index, query_data, result_data[method], verbose=False
+        # )
 
-        print("micro accuracy: {}".format(micro_logi))
-        print("macro accuracy: {}".format(macro_logi))
+        # print("micro accuracy: {}".format(micro_logi))
+        # print("macro accuracy: {}".format(macro_logi))
 
-        res_file = "eval_res/splits_{}/{}/logical.csv".format(args.splits, method)
-        logi_result_agg.to_csv(res_file, index=False)
-        print("save to {}".format(res_file))
+        # res_file = "eval_res/splits_{}/{}/logical.csv".format(args.splits, method)
+        # logi_result_agg.to_csv(res_file, index=False)
+        # print("save to {}".format(res_file))
 
         print("Logical constraints (python version):")
         macro_logi, micro_logi, conditional_macro_logi, conditional_micro_logi, logi_result_agg, logi_pass_id = evaluate_hard_constraints_v2(

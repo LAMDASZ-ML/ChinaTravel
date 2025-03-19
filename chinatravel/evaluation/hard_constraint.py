@@ -49,7 +49,7 @@ def evaluate_hard_constraints(data_index, symbolic_input_dict, plan_json_dict, v
     for ii, idx in enumerate(data_index):
         symbolic_input, plan_json = symbolic_input_dict[idx], plan_json_dict[idx]  
         
-        extracted_vars=get_symbolic_concepts(symbolic_input,plan_json, need_ood=True)
+        extracted_vars=get_symbolic_concepts(symbolic_input, plan_json, need_ood=False)
         
     
         
