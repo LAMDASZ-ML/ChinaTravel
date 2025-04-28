@@ -9,6 +9,16 @@ Official codebase for the paper "ChinaTravel: A Real-World Benchmark for Languag
 
 ![Overview](images/overview.png)
 
+## Update
+
+2025.4
+
+1. Local data loader. You could load your local queries now!
+   当你使用['easy','medium','human']之外的splits_name,e.g. abc, 调用run_exp时，data_loader会自动加载evaluation/default_splits/abc.txt, 其中abc.txt包含所需要跑的query的file name list.
+2. Constraints classification.
+   See detailed docs at [Evaluation README](chinatravel/symbol_verification/readme.md)
+3. LLM-modulo pipeline with a ground-truth symbolic verifier.
+
 ## Quick Start
 
 ### Setup

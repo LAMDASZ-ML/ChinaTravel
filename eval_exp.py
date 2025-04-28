@@ -86,6 +86,8 @@ if __name__ == "__main__":
     query_index, query_data = load_query(args)
     method_list, result_data = load_result(args, query_index)
 
+    # print(result_data)
+
 
 
     schema_file_path = 'chinatravel/evaluation/output_schema.json'

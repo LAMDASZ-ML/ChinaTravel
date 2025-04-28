@@ -39,6 +39,9 @@
                 "cost": {
                   "type": "number"
                 },
+                "price": {
+                  "type": "number"
+                },
                 "tickets": {
                   "type": "integer"
                 },
@@ -71,6 +74,9 @@
                       "cost": {
                         "type": "number"
                       },
+                      "price": {
+                        "type": "number"
+                      },
                       "distance": {
                         "type": "number"
                       },
@@ -84,6 +90,7 @@
                       "mode",
                       "start_time",
                       "end_time",
+                      "price", 
                       "cost",
                       "distance"
                     ]
@@ -109,7 +116,8 @@
                 "type",
                 "start_time",
                 "end_time",
-                "cost"
+                "cost",
+                "price"
               ],
               "allOf": [
                 {

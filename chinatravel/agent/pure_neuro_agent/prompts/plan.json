@@ -11,6 +11,7 @@
                   "end_time": "08:23",
                   "start": "北京首都国际机场",
                   "end": "南京禄口国际机场",
+                  "price": 448.38,
                   "cost": 448.38,
                   "FlightID": "FL159",
                   "type": "airplane",
@@ -27,6 +28,7 @@
                           "mode": "walk",
                           "start_time": "08:23",
                           "end_time": "08:26",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.27
                       },
@@ -36,6 +38,7 @@
                           "mode": "metro",
                           "start_time": "08:26",
                           "end_time": "09:35",
+                          "price": 7,
                           "cost": 7,
                           "distance": 34.56,
                           "tickets": 1
@@ -46,10 +49,12 @@
                           "mode": "walk",
                           "start_time": "09:35",
                           "end_time": "09:52",
+                          "price": 0,
                           "cost": 0,
                           "distance": 1.48
                       }
                   ],
+                  "price": 65.0,
                   "cost": 65.0,
                   "tickets": 1,
                   "start_time": "10:00",
@@ -65,6 +70,7 @@
                           "mode": "walk",
                           "start_time": "11:20",
                           "end_time": "11:37",
+                          "price": 0,
                           "cost": 0,
                           "distance": 1.48
                       },
@@ -74,6 +80,7 @@
                           "mode": "metro",
                           "start_time": "11:37",
                           "end_time": "11:47",
+                          "price": 3,
                           "cost": 3,
                           "distance": 5.42,
                           "tickets": 1
@@ -84,10 +91,12 @@
                           "mode": "walk",
                           "start_time": "11:47",
                           "end_time": "11:50",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.33
                       }
                   ],
+                  "price": 499,
                   "cost": 499,
                   "start_time": "12:00",
                   "end_time": "12:50"
@@ -102,6 +111,7 @@
                           "mode": "walk",
                           "start_time": "12:50",
                           "end_time": "12:53",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.33
                       },
@@ -111,6 +121,7 @@
                           "mode": "metro",
                           "start_time": "12:53",
                           "end_time": "13:11",
+                          "price": 4,
                           "cost": 4,
                           "distance": 9.22,
                           "tickets": 1
@@ -121,11 +132,13 @@
                           "mode": "walk",
                           "start_time": "13:11",
                           "end_time": "13:30",
+                          "price": 0,
                           "cost": 0,
                           "distance": 1.63
                       }
                   ],
-                  "cost": 0.0,
+                  "price": 0,
+                  "cost": 0,
                   "tickets": 1,
                   "start_time": "13:40",
                   "end_time": "15:00"
@@ -140,6 +153,7 @@
                           "mode": "walk",
                           "start_time": "15:00",
                           "end_time": "15:19",
+                          "price": 0,
                           "cost": 0,
                           "distance": 1.63
                       },
@@ -149,6 +163,7 @@
                           "mode": "metro",
                           "start_time": "15:19",
                           "end_time": "15:37",
+                          "price": 4,
                           "cost": 4,
                           "distance": 9.23,
                           "tickets": 1
@@ -159,11 +174,13 @@
                           "mode": "walk",
                           "start_time": "15:37",
                           "end_time": "15:46",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.75
                       }
                   ],
-                  "cost": 0.0,
+                  "price": 0,
+                  "cost": 0,
                   "tickets": 1,
                   "start_time": "15:50",
                   "end_time": "17:10"
@@ -178,6 +195,7 @@
                           "mode": "walk",
                           "start_time": "17:10",
                           "end_time": "17:19",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.75
                       },
@@ -187,6 +205,7 @@
                           "mode": "metro",
                           "start_time": "17:19",
                           "end_time": "17:23",
+                          "price": 2,
                           "cost": 2,
                           "distance": 2.06,
                           "tickets": 1
@@ -197,11 +216,13 @@
                           "mode": "walk",
                           "start_time": "17:23",
                           "end_time": "17:24",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.14
                       }
                   ],
                   "room_type": 2,
+                  "price": 680,
                   "cost": 680,
                   "start_time": "17:30",
                   "end_time": "24:00",
@@ -222,6 +243,7 @@
                           "mode": "walk",
                           "start_time": "08:00",
                           "end_time": "08:01",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.14
                       },
@@ -231,6 +253,7 @@
                           "mode": "metro",
                           "start_time": "08:01",
                           "end_time": "08:03",
+                          "price": 2,
                           "cost": 2,
                           "distance": 1.36,
                           "tickets": 1
@@ -241,11 +264,13 @@
                           "mode": "walk",
                           "start_time": "08:03",
                           "end_time": "08:12",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.76
                       }
                   ],
-                  "cost": 0.0,
+                  "price": 0,
+                  "cost": 0,
                   "tickets": 1,
                   "start_time": "08:20",
                   "end_time": "09:40"
@@ -260,6 +285,7 @@
                           "mode": "walk",
                           "start_time": "09:40",
                           "end_time": "09:49",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.76
                       },
@@ -269,6 +295,7 @@
                           "mode": "metro",
                           "start_time": "09:49",
                           "end_time": "09:56",
+                          "price": 2,
                           "cost": 2,
                           "distance": 3.82,
                           "tickets": 1
@@ -279,11 +306,13 @@
                           "mode": "walk",
                           "start_time": "09:56",
                           "end_time": "10:05",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.81
                       }
                   ],
-                  "cost": 0.0,
+                  "price": 0,
+                  "cost": 0,
                   "tickets": 1,
                   "start_time": "10:10",
                   "end_time": "11:30"
@@ -298,6 +327,7 @@
                           "mode": "walk",
                           "start_time": "11:30",
                           "end_time": "11:39",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.81
                       },
@@ -307,6 +337,7 @@
                           "mode": "metro",
                           "start_time": "11:39",
                           "end_time": "11:48",
+                          "price": 3,
                           "cost": 3,
                           "distance": 4.84,
                           "tickets": 1
@@ -317,10 +348,12 @@
                           "mode": "walk",
                           "start_time": "11:48",
                           "end_time": "11:57",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.83
                       }
                   ],
+                  "price": 78,
                   "cost": 78,
                   "start_time": "12:00",
                   "end_time": "12:50"
@@ -335,6 +368,7 @@
                           "mode": "walk",
                           "start_time": "12:50",
                           "end_time": "12:59",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.83
                       },
@@ -344,6 +378,7 @@
                           "mode": "metro",
                           "start_time": "12:59",
                           "end_time": "13:01",
+                          "price": 2,
                           "cost": 2,
                           "distance": 1.20,
                           "tickets": 1
@@ -354,11 +389,13 @@
                           "mode": "walk",
                           "start_time": "13:01",
                           "end_time": "13:07",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.52
                       }
                   ],
-                  "cost": 0.0,
+                  "price": 0,
+                  "cost": 0,
                   "tickets": 1,
                   "start_time": "13:10",
                   "end_time": "14:30"
@@ -373,6 +410,7 @@
                           "mode": "walk",
                           "start_time": "14:30",
                           "end_time": "14:36",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.52
                       },
@@ -382,6 +420,7 @@
                           "mode": "metro",
                           "start_time": "14:36",
                           "end_time": "14:38",
+                          "price": 2,
                           "cost": 2,
                           "distance": 1.20,
                           "tickets": 1
@@ -392,11 +431,13 @@
                           "mode": "walk",
                           "start_time": "14:38",
                           "end_time": "14:43",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.47
                       }
                   ],
-                  "cost": 0.0,
+                  "price": 0,
+                  "cost": 0,
                   "tickets": 1,
                   "start_time": "14:50",
                   "end_time": "16:10"
@@ -411,10 +452,12 @@
                           "mode": "walk",
                           "start_time": "16:10",
                           "end_time": "16:21",
-                          "cost": 0.0,
+                          "price": 0,
+                          "cost": 0,
                           "distance": 0.97
                       }
                   ],
+                  "price": 25,
                   "cost": 25,
                   "start_time": "16:30",
                   "end_time": "17:20"
@@ -433,6 +476,7 @@
                           "mode": "walk",
                           "start_time": "17:20",
                           "end_time": "17:29",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.77
                       },
@@ -442,6 +486,7 @@
                           "mode": "metro",
                           "start_time": "17:29",
                           "end_time": "17:38",
+                          "price": 3,
                           "cost": 3,
                           "distance": 4.75
                       },
@@ -451,10 +496,12 @@
                           "mode": "walk",
                           "start_time": "17:38",
                           "end_time": "17:41",
+                          "price": 0,
                           "cost": 0,
                           "distance": 0.29
                       }
                   ],
+                  "price": 583.83,
                   "cost": 583.83,
                   "tickets": 1
               }

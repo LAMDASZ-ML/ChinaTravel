@@ -54,7 +54,7 @@ class Deepseek(AbstractLLM):
         self.llm = OpenAI(
             base_url="https://api.deepseek.com",
         )
-        self.name = "Deepseek"
+        self.name = "DeepSeek-V3"
 
     def _send_request(self, messages, kwargs):
         res_str = (
@@ -68,7 +68,7 @@ class Deepseek(AbstractLLM):
     def _get_response(self, messages, one_line, json_mode):
         kwargs = {
             "model": "deepseek-chat",
-            "max_tokens": 8192,
+            "max_tokens": 4096,
             "temperature": 0,
             "top_p": 0.00000001,
         }
