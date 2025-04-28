@@ -10,6 +10,8 @@ def init_agent(kwargs):
         ONESHOT_REACT_INSTRUCTION_GLM4,
     )
 
+    from .nesy_verifier import LLMModuloAgent
+
     if kwargs["method"] == "RuleNeSy":
         agent = RuleDrivenAgent(
             env=kwargs["env"],
@@ -49,6 +51,13 @@ def init_agent(kwargs):
                 if "glm4" not in kwargs["backbone_llm"].name.lower()
                 else ZEROSHOT_REACT_INSTRUCTION_GLM4
             ),
+        )
+    elif kwargs["method"] == "LLM-modulo":
+
+        kwargs["model"] = kwargs["backbone_llm"]
+        kwargs["max_steps"] = kwargs["refine_steps"]
+        agent = LLMModuloAgent(
+            **kwargs
         )
     else:
         raise Exception("Not Implemented")

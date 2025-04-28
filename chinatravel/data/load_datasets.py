@@ -87,6 +87,9 @@ def save_json_file(json_data, file_path):
 
 def load_query(args):
     
+    if not args.splits in ["easy", "medium", "human"]:
+        return load_query_local(args)
+
     query_data = hg_load_dataset("LAMDA-NeSy/ChinaTravel")[args.splits].to_list()
     
 

@@ -51,7 +51,7 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
     # print("input: ", symbolic_input)
     # print("plan: ", plan_json)
     
-    table_statistics = pd.DataFrame(columns=['Invalid Trains', 'Invalid Airplanes', 'Incorrect Cost of Intercity Transport', 'Incorrect Schedule of Intercity Transport'])
+    table_statistics = pd.DataFrame(columns=['Intercity transportation events must occur', 'Invalid Trains or Airplanes, given TrainID/FlightID, origin and destination', 'Incorrect Information of Intercity Transport on price or duration', 'Incorrect Cost on Intercity Transportation'])
 
     error_info = []
 
@@ -83,28 +83,28 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
     if("FlightID" not in go_intercity_transport_plan.keys()) and ("TrainID" not in go_intercity_transport_plan.keys()): 
         # return return_info(False, "The first activity should be a transport.") # "The first transport should be from origin to destination.")
         table_statistics.loc[0] = [1, 1, 1, 1]
-        error_info = ["The first activity should be a transport."]
+        error_info = ["The first activity should be an intercity transport."]
         return table_statistics, error_info
     
     if("FlightID" not in back_intercity_transport_plan.keys()) and ("TrainID" not in back_intercity_transport_plan.keys()): 
         # return return_info(False, "The last activity should be a transport.") # "The last transport should be from destination to origin.")
         table_statistics.loc[0] = [1, 1, 1, 1]
-        error_info = ["The last activity should be a transport."]
+        error_info = ["The last activity should be an intercity transport."]
         return table_statistics, error_info
 
 
     go_type=go_intercity_transport_plan['type']
     if go_type!='airplane' and go_type!='train':
         # return return_info(False, "Intercity transport type should be airplane or train")
-        table_statistics.loc[0] = [1, 1, 1, 1]
-        error_info = ["Intercity transport type should be airplane or train."]
+        table_statistics.loc[0] = [0, 1, 1, 1]
+        error_info = ["Intercity transport type should be airplane or train in the sandbox."]
         return table_statistics, error_info
     
     back_type=back_intercity_transport_plan['type']
     if back_type!='airplane' and back_type!='train':
         # return return_info(False, "Intercity transport type should be airplane or train")
-        table_statistics.loc[0] = [1, 1, 1, 1]
-        error_info = ["Intercity transport type should be airplane or train."]
+        table_statistics.loc[0] = [0, 1, 1, 1]
+        error_info = ["Intercity transport type should be airplane or train in the sandbox."]
         return table_statistics, error_info
     
 
@@ -114,13 +114,13 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
 
     if not ("start" in go_intercity_transport_plan and "end" in go_intercity_transport_plan):
         # return return_info(False, "intercity-transport should provide start and end position.")
-        table_statistics.loc[0] = [1, 1, 1, 1]
+        table_statistics.loc[0] = [0, 1, 1, 1]
         error_info.append("Intercity-transport Go should provide start and end position.")
         return table_statistics, error_info
     
     if not ("start" in back_intercity_transport_plan and "end" in back_intercity_transport_plan):
         # return return_info(False, "intercity-transport should provide start and end position.")
-        table_statistics.loc[0] = [1, 1, 1, 1]
+        table_statistics.loc[0] = [0, 1, 1, 1]
         error_info.append("Intercity-transport Back should provide start and end position.")
         return table_statistics, error_info
     
@@ -131,7 +131,7 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
             try: 
                 go_intercity_transport_plan['FlightID']
             except: 
-                table_statistics.loc[0] = [1, 1, 1, 1]
+                table_statistics.loc[0] = [0, 1, 1, 1]
                 error_info.append("Iintercity airplane (Go) should provide the valid FlightID.")
                 break
 
@@ -143,10 +143,10 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                     if row['BeginTime'] == go_intercity_transport_plan['start_time'] and row['EndTime'] == go_intercity_transport_plan['end_time']:
                         pass
                     else:
-                        table_statistics.loc[0,  "Incorrect Schedule of Intercity Transport"] = 1
+                        table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                         error_info.append("Incorrect duration information of given intercity airplane (Go) [start_time -> end_time].")
                 except: 
-                    table_statistics.loc[0,  "Incorrect Schedule of Intercity Transport"] = 1
+                    table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                     error_info.append("Iintercity airplane (Go) should provide the duration information.")
                 
                 try: 
@@ -154,18 +154,29 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                     if row['Cost']==go_intercity_transport_plan['price']:
                         pass                    
                     else:
-                        table_statistics.loc[0,  "Incorrect price of Intercity Transport"] = 1
+                        table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                         error_info.append("Incorrect price information of given intercity airplane [origin -> destination].")
                 except: 
-                    table_statistics.loc[0,  "Incorrect price of Intercity Transport"] = 1
+                    table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                     error_info.append("Iintercity airplane (Go) should provide the price information.")
                 
+
+                try:
+                    go_intercity_transport_plan['tickets']
+                    go_intercity_transport_plan['cost']
+                    if go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] != go_intercity_transport_plan['cost']:
+                        table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
+                        error_info.append("Incorrect cost information of given intercity airplane (Go) [cost = price * tickets].")
+                except: 
+                    table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
+                    error_info.append("Iintercity airplane (Go) should provide the tickets and cost information.")
+
                 break
         if go_type=='train':
             try: 
                 go_intercity_transport_plan['TrainID']
             except: 
-                table_statistics.loc[0] = [1, 1, 1, 1]
+                table_statistics.loc[0] = [0, 1, 1, 1]
                 error_info.append("Iintercity train (Go) should provide the valid TrainID.")
                 break
 
@@ -177,10 +188,10 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                     if row['BeginTime'] == go_intercity_transport_plan['start_time'] and row['EndTime'] == go_intercity_transport_plan['end_time']:
                         pass
                     else:
-                        table_statistics.loc[0,  "Incorrect Schedule of Intercity Transport"] = 1
-                        error_info.append("Incorrect duration information of given intercity airplane (Go) [start_time -> end_time].")
+                        table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
+                        error_info.append("Incorrect duration information of given intercity train (Go) [start_time -> end_time].")
                 except: 
-                    table_statistics.loc[0,  "Incorrect Schedule of Intercity Transport"] = 1
+                    table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                     error_info.append("Iintercity train (Go) should provide the duration information.")
                 
                 try: 
@@ -188,16 +199,28 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                     if row['Cost']==go_intercity_transport_plan['price']:
                         pass                    
                     else:
-                        table_statistics.loc[0,  "Incorrect price of Intercity Transport"] = 1
-                        error_info.append("Incorrect price information of given intercity airplane [origin -> destination].")
+                        table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
+                        error_info.append("Incorrect price information of given intercity train [origin -> destination].")
                 except: 
-                    table_statistics.loc[0,  "Incorrect price of Intercity Transport"] = 1
+                    table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                     error_info.append("Iintercity train (Go) should provide the price information.")
-                    
+                
+
+
+                try:
+                    go_intercity_transport_plan['tickets']
+                    go_intercity_transport_plan['cost']
+                    if go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] != go_intercity_transport_plan['cost']:
+                        table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
+                        error_info.append("Incorrect cost information of given intercity train (Go) [cost = price * tickets].")
+                except: 
+                    table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
+                    error_info.append("Iintercity train (Go) should provide the tickets and cost information.")
+
                 break
 
     if go_flag==0:
-        table_statistics.loc[0] = [1, 1, 1, 1]
+        table_statistics.loc[0] = [0, 1, 1, 1]
         error_info.append("No information found given transport ID.")
 
     
@@ -210,7 +233,7 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
             try: 
                 back_intercity_transport_plan['FlightID']
             except: 
-                table_statistics.loc[0] = [1, 1, 1, 1]
+                table_statistics.loc[0] = [0, 1, 1, 1]
                 error_info.append("Iintercity airplane (Back) should provide the valid FlightID.")
                 break
             if back_intercity_transport_plan['FlightID']==row['FlightID'] and back_intercity_transport_plan['start']==row['From'] and back_intercity_transport_plan['end']==row['To']:
@@ -221,10 +244,10 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                     if row['BeginTime'] == back_intercity_transport_plan['start_time'] and row['EndTime'] == back_intercity_transport_plan['end_time']:
                         pass
                     else:
-                        table_statistics.loc[0,  "Incorrect Schedule of Intercity Transport"] = 1
+                        table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                         error_info.append("Incorrect duration information of given intercity airplane (Back) [start_time -> end_time].")
                 except: 
-                    table_statistics.loc[0,  "Incorrect Schedule of Intercity Transport"] = 1
+                    table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                     error_info.append("Iintercity airplane (Back) should provide the duration information.")
                 
                 try: 
@@ -232,11 +255,22 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                     if row['Cost']==back_intercity_transport_plan['price']:
                         pass                    
                     else:
-                        table_statistics.loc[0,  "Incorrect price of Intercity Transport"] = 1
+                        table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                         error_info.append("Incorrect price information of given intercity airplane [destination -> origin].")
                 except: 
-                    table_statistics.loc[0,  "Incorrect price of Intercity Transport"] = 1
+                    table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                     error_info.append("Iintercity airplane (Back) should provide the price information.")
+
+                
+                try:
+                    back_intercity_transport_plan['tickets']
+                    back_intercity_transport_plan['cost']
+                    if back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] != back_intercity_transport_plan['cost']:
+                        table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
+                        error_info.append("Incorrect cost information of given intercity airplane (Back) [cost = price * tickets].")
+                except: 
+                    table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
+                    error_info.append("Iintercity airplane (Back) should provide the tickets and cost information.")
                 break
 
         if back_type=='train':
@@ -244,7 +278,7 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                 back_intercity_transport_plan['TrainID']
             except: 
                 table_statistics.loc[0] = [1, 1, 1, 1]
-                error_info.append("Iintercity airplane (Back) should provide the valid TrainID.")
+                error_info.append("Iintercity train (Back) should provide the valid TrainID.")
                 break
                 
             
@@ -256,10 +290,10 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                     if row['BeginTime'] == back_intercity_transport_plan['start_time'] and row['EndTime'] == back_intercity_transport_plan['end_time']:
                         pass
                     else:
-                        table_statistics.loc[0,  "Incorrect Time of Intercity Transport"] = 1
-                        error_info.append("Incorrect time information of given intercity airplane [destination -> origin].")
+                        table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
+                        error_info.append("Incorrect time information of given intercity train [destination -> origin].")
                 except: 
-                    table_statistics.loc[0,  "Incorrect Schedule of Intercity Transport"] = 1
+                    table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                     error_info.append("Iintercity train (Back) should provide the duration information.")
 
                 try: 
@@ -267,15 +301,26 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                     if row['Cost']==back_intercity_transport_plan['price']:
                         pass                    
                     else:
-                        table_statistics.loc[0,  "Incorrect price of Intercity Transport"] = 1
-                        error_info.append("Incorrect price information of given intercity airplane [origin -> destination].")
+                        table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
+                        error_info.append("Incorrect price information of given intercity train [origin -> destination].")
                 except: 
-                    table_statistics.loc[0,  "Incorrect price of Intercity Transport"] = 1
+                    table_statistics.loc[0,  "Incorrect Information of Intercity Transport on price or duration"] = 1
                     error_info.append("Iintercity train (Back) should provide the price information.")
+
+                try:
+                    back_intercity_transport_plan['tickets']
+                    back_intercity_transport_plan['cost']
+                    if back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] != back_intercity_transport_plan['cost']:
+                        table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
+                        error_info.append("Incorrect cost information of given intercity train (Back) [cost = price * tickets].")
+                except: 
+                    table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
+                    error_info.append("Iintercity train (Back) should provide the tickets and cost information.")
+
                 break
     
     if back_flag==0:
-        table_statistics.loc[0] = [1, 1, 1, 1]
+        table_statistics.loc[0] = [0, 1, 1, 1]
         error_info.append("No information found given transport ID.")
 
     if verbose:
@@ -293,19 +338,19 @@ def Is_attractions_correct(symbolic_input, plan_json, verbose=False):
     target_city = symbolic_input["target_city"]
 
 
-    table_statistics = pd.DataFrame(columns=['Unavailable attractions', 'Visiting attraction in their closed time', 'Repeated attraction Choices', 'Incorrect price Information of attraction'])
+    table_statistics = pd.DataFrame(columns=['Unavailable attractions', 'Visiting attraction in their closed time', 'Repeated attraction Choices', 'Incorrect price Information of attraction', 'Incorrect cost Information of attraction'])
 
     error_info = []    
     try: 
         plan_json["itinerary"]
     except: 
-        table_statistics.loc[0] = [1, 1, 1, 1]
+        table_statistics.loc[0] = [1, 1, 1, 1, 1]
         error_info = ["Error plan type, must be python dict"]
         return table_statistics, error_info
 
     plan = plan_json["itinerary"]
     
-    table_statistics.loc[0] = [0, 0, 0, 0]
+    table_statistics.loc[0] = [0, 0, 0, 0, 0]
     attraction_list = []
 
     for day_plan_i in plan:
@@ -321,7 +366,7 @@ def Is_attractions_correct(symbolic_input, plan_json, verbose=False):
             # print(activity_i)
             try: activity_i["position"]
             except: 
-                table_statistics.loc[0] = [1, 1, 1, 1]
+                table_statistics.loc[0] = [1, 1, 1, 1, 1]
                 error_info.append("No position information!")
                 return table_statistics, error_info
             
@@ -330,7 +375,7 @@ def Is_attractions_correct(symbolic_input, plan_json, verbose=False):
             # print(select_attraction)
 
             if select_attraction.empty:
-                table_statistics.loc[0] = [1, 1, 1, 1]
+                table_statistics.loc[0] = [1, 1, 1, 1, 1]
                 error_info.append("No information found given attraction [{}]".format(activity_i["position"]))
                 return table_statistics, error_info
 
@@ -364,6 +409,18 @@ def Is_attractions_correct(symbolic_input, plan_json, verbose=False):
                 table_statistics.loc[0,  'Incorrect price Information of attraction'] = 1
                 error_info.append("Attraction price should be provided")
 
+            
+            try: 
+                activity_i["tickets"]
+                activity_i["cost"]
+                if activity_i["price"] * activity_i["tickets"] != activity_i["cost"]:
+                    table_statistics.loc[0,  'Incorrect cost Information of attraction'] = 1
+                    error_info.append("Incorrect cost information of attraction [cost = price * tickets].")
+                        
+            except: 
+                table_statistics.loc[0,  'Incorrect cost Information of attraction'] = 1
+                error_info.append("Incorrect cost Information of attraction")
+
             # if not select_attraction_type.empty:
             #     spot_type.add(select_attraction_type.iloc[0])
             # attraction_names.add(activity["position"])
@@ -385,17 +442,17 @@ def Is_attractions_correct(symbolic_input, plan_json, verbose=False):
 def Is_hotels_correct(symbolic_input, plan_json, verbose=False): 
 
     target_city = symbolic_input["target_city"]
-    table_statistics = pd.DataFrame(columns=['Unavailable Accommodation', 'Room information does not meet headcounts.', 'Incorrect price Information of Accommodation'])
+    table_statistics = pd.DataFrame(columns=['Unavailable Accommodation', 'Incorrect Information of Accommodation on price or room type', 'Incorrect cost Information of Accommodation', 'Accomondation is necessary for trips longer than one day'])
 
     error_info = []    
     try: 
         plan_json["itinerary"]
     except: 
-        table_statistics.loc[0] = [1, 1, 1]
+        table_statistics.loc[0] = [1, 1, 1, 1]
         error_info = ["Error plan type, must be python dict"]
         return table_statistics, error_info
 
-    table_statistics.loc[0] = [0, 0, 0]
+    table_statistics.loc[0] = [0, 0, 0, 0]
 
     plan = plan_json["itinerary"]
     
@@ -414,7 +471,7 @@ def Is_hotels_correct(symbolic_input, plan_json, verbose=False):
             
             try: activity_i["position"]
             except: 
-                table_statistics.loc[0] = [1, 1, 1]
+                table_statistics.loc[0] = [1, 1, 1, 1]
                 error_info.append("No position information!")
                 return table_statistics, error_info
             
@@ -422,7 +479,7 @@ def Is_hotels_correct(symbolic_input, plan_json, verbose=False):
             # print(select_hotel)
 
             if select_hotel.empty:
-                table_statistics.loc[0] = [1, 1, 1]
+                table_statistics.loc[0] = [1, 1, 1, 1]
                 error_info.append("No information found given hotel [{}]".format(activity_i["position"]))
                 return table_statistics, error_info
 
@@ -433,11 +490,11 @@ def Is_hotels_correct(symbolic_input, plan_json, verbose=False):
             try: 
                 activity_i["price"]
                 if activity_i["price"] != select_hotel["price"].values[0]:
-                    table_statistics.loc[0,  'Incorrect price Information of Accommodation'] = 1
+                    table_statistics.loc[0,  'Incorrect Information of Accommodation on price or room type'] = 1
                     error_info.append("Incorrect price infomation of accommodation [{}], price: {} ".format(activity_i["position"], select_hotel["price"].values[0]))
             
             except: 
-                table_statistics.loc[0,  'Incorrect price Information of Accommodation'] = 1
+                table_statistics.loc[0,  'Incorrect Information of Accommodation on price or room type'] = 1
                 error_info.append("Hotel price should be provided")
                 
 
@@ -445,55 +502,29 @@ def Is_hotels_correct(symbolic_input, plan_json, verbose=False):
             try: 
                 activity_i["room_type"]    
                 if activity_i["room_type"] != select_hotel["numbed"].values[0]:
-                    table_statistics.loc[0,  'Room information does not meet headcounts.'] = 1
+                    table_statistics.loc[0,  'Incorrect Information of Accommodation on price or room type'] = 1
                     error_info.append("Incorrect room infomation of accommodation [{}], numbed: {} ".format(activity_i["position"], select_hotel["numbed"].values[0]))
             except: 
-                table_statistics.loc[0,  'Room information does not meet headcounts.'] = 1
+                table_statistics.loc[0,  'Incorrect Information of Accommodation on price or room type'] = 1
                 error_info.append("Room information should be provided")
             
-            
-            # "rooms=={1}",
-            # "room_types=={1}",
-            
-            
-            # limit_rooms, limits_room_type = False, False
-            
-            # for logical_i in symbolic_input["hard_logic"]:
+            try:
+                activity_i["rooms"]
+                if activity_i["rooms"] * activity_i["price"] != activity_i["cost"]:
+                    table_statistics.loc[0,  'Incorrect cost Information of Accommodation'] = 1
+                    error_info.append("Incorrect cost information of accommodation [cost = price * rooms].")
+            except: 
+                table_statistics.loc[0,  'Incorrect cost Information of Accommodation'] = 1
+                error_info.append("Cost and rooms information should be provided")
 
-            #     if not isinstance(logical_i, str):
-            #         continue
-            #     if "rooms" in logical_i:
-            #         limit_rooms = True
-            #     if "room_type" in logical_i:
-            #         limits_room_type = True
-            limit_rooms, limits_room_type = symbolic_input["limit_rooms"], symbolic_input["limits_room_type"]
 
-            if limit_rooms and limits_room_type:
-                pass
-            else:               
-                room_type = activity_i["room_type"]
-                rooms = activity_i["rooms"]
-                # people_number = int(symbolic_input["hard_logic"][1].split("==")[1])
-                # people_number_idx = 1
-                # for i, l in enumerate(symbolic_input["hard_logic"]):
-                #     if "people_number" in l:
-                #         people_number_idx = i
-                # people_number = int(symbolic_input["hard_logic"][people_number_idx].split("==")[1])
-                people_number = symbolic_input["people_number"]
-            
-                if (room_type * rooms >= people_number) and (room_type * rooms < people_number + room_type):
-                    pass
-                else:
-                    table_statistics.loc[0,  'Room information does not meet headcounts.'] = 1
-                    error_info.append("Incorrect room infomation for {} people, given rooms: {}, numbed: {} ".format(people_number, rooms, room_type))
-
-    if len(set(hotel_list)) > 1:
-        # return return_info(False, "Hotel should be unique during the trip.")
-        table_statistics.loc[0] = [1, 1, 1]
-        error_info.append("Hotel should be unique during the trip.")
+    # if len(set(hotel_list)) > 1:
+    #     # return return_info(False, "Hotel should be unique during the trip.")
+    #     table_statistics.loc[0] = [1, 1, 1]
+    #     error_info.append("Hotel should be unique during the trip.")
     
     if len(plan_json["itinerary"]) > 1 and len(hotel_list) == 0:
-        table_statistics.loc[0] = [1, 1, 1]
+        table_statistics.loc[0, 'Accomondation is necessary for trips longer than one day'] = 1
         error_info.append("We need a hotel for a trip more than one day.")
         
     if verbose:
@@ -507,17 +538,17 @@ def Is_hotels_correct(symbolic_input, plan_json, verbose=False):
 def Is_restaurants_correct(symbolic_input, plan_json, verbose=False): 
     
     target_city = symbolic_input["target_city"]
-    table_statistics = pd.DataFrame(columns=['Unavailable Restruants', 'Visiting Restruants in their closed time', 'Repeated Restruants Choices', 'Incorrect price Information of Restruants', 'Inappropriate Meal Times'])
+    table_statistics = pd.DataFrame(columns=['Unavailable Restruants', 'Visiting Restruants in their closed time', 'Repeated Restruants Choices', 'Incorrect price Information of Restruants', 'Incorrect cost Information of Restruants', 'Inappropriate Meal Times'])
 
     error_info = []    
     try: 
         plan_json["itinerary"]
     except: 
-        table_statistics.loc[0] = [1, 1, 1, 1, 1]
+        table_statistics.loc[0] = [1, 1, 1, 1, 1, 1]
         error_info = ["Error plan type, must be python dict"]
         return table_statistics, error_info
 
-    table_statistics.loc[0] = [0, 0, 0, 0, 0]
+    table_statistics.loc[0] = [0, 0, 0, 0, 0, 0]
 
     plan = plan_json["itinerary"]
     
@@ -534,7 +565,7 @@ def Is_restaurants_correct(symbolic_input, plan_json, verbose=False):
             # print(activity_i)
             try: activity_i["position"]
             except: 
-                table_statistics.loc[0] = [1, 1, 1, 1, 1]
+                table_statistics.loc[0] = [1, 1, 1, 1, 1, 1]
                 error_info.append("No position information!")
                 return table_statistics, error_info
             
@@ -548,7 +579,7 @@ def Is_restaurants_correct(symbolic_input, plan_json, verbose=False):
                 select_hotel=accommodation.select(target_city,key='name',func=lambda x:x==activity_i["position"])
     
                 if select_hotel.empty:
-                    table_statistics.loc[0] = [1, 1, 1, 1, 1]
+                    table_statistics.loc[0] = [1, 1, 1, 1, 1, 1]
                     error_info.append("No information found given restaurant [{}]".format(activity_i["position"]))
                 try:
                     activity_i["price"]
@@ -571,11 +602,20 @@ def Is_restaurants_correct(symbolic_input, plan_json, verbose=False):
                     table_statistics.loc[0,  'Inappropriate Meal Times'] = 1
                     error_info.append("The time of breakfast should be provided")
 
+                try:
+                    activity_i["cost"]
+                    if symbolic_input["people_number"] * activity_i["price"] != activity_i["cost"]:
+                        table_statistics.loc[0,  'Incorrect cost Information of Restruants'] = 1
+                        error_info.append("Incorrect cost information of Restruants Events [cost = price * people_number].")
+                except:
+                    table_statistics.loc[0,  'Incorrect cost Information of Restruants'] = 1
+                    error_info.append("The Restruants Events should provide cost information")
+
                 continue
             
             if select_restaurant.empty:
                 # return return_info(False, "No information found given restaurant [{}]".format(activity_i["position"]))
-                table_statistics.loc[0] = [1, 1, 1, 1, 1]
+                table_statistics.loc[0] = [1, 1, 1, 1, 1, 1]
                 error_info.append("No information found given restaurant [{}]".format(activity_i["position"]))
                 continue
             
@@ -600,9 +640,16 @@ def Is_restaurants_correct(symbolic_input, plan_json, verbose=False):
             except:
                 table_statistics.loc[0,  'Inappropriate Meal Times'] = 1
                 error_info.append("Schedule of Restruants should be provided")
-            # if not select_attraction_type.empty:
-            #     spot_type.add(select_attraction_type.iloc[0])
-            # attraction_names.add(activity["position"])
+        
+
+            try:
+                activity_i["cost"]
+                if symbolic_input["people_number"] * activity_i["price"] != activity_i["cost"]:
+                    table_statistics.loc[0,  'Incorrect cost Information of Restruants'] = 1
+                    error_info.append("Incorrect cost information of Restruants Events [cost = price * people_number].")
+            except:
+                table_statistics.loc[0,  'Incorrect cost Information of Restruants'] = 1
+                error_info.append("The Restruants Events should provide cost information")
             
             # 开放时间
             opentime, endtime = select_restaurant["opentime"].values[0],  select_restaurant["endtime"].values[0]
@@ -639,17 +686,17 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
     
 
     target_city = symbolic_input["target_city"]
-    table_statistics = pd.DataFrame(columns=['Unavailable Inner-City Transport', 'Incorrect price Information of Inner-City Transport', 'Incorrect Distance Information of Inner-City Transport', 'Incorrect Duration Information of Inner-City Transport'])
+    table_statistics = pd.DataFrame(columns=['Unavailable Inner-City Transport', 'Incorrect Information of Inner-City Transporton on price, distance, and duration', 'Inccorrect cost information of Inner-City Transport'])
 
     error_info = []    
     try: 
         plan_json["itinerary"]
     except: 
-        table_statistics.loc[0] = [1, 1, 1, 1]
+        table_statistics.loc[0] = [1, 1, 1]
         error_info = ["Error plan type, must be python dict"]
         return table_statistics, error_info
 
-    table_statistics.loc[0] = [0, 0, 0, 0]
+    table_statistics.loc[0] = [0, 0, 0]
 
     plan = plan_json["itinerary"]
     for day_plan_i in plan:
@@ -669,7 +716,7 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
                     transport_i[0]["start_time"]
                     transport_i[-1]["end_time"]
                 except:
-                    table_statistics.loc[0] = [1, 1, 1, 1]
+                    table_statistics.loc[0] = [1, 1, 1]
                     error_info.append("Key Error: [start, end, start_time, end_time]")
                 
                 source_poi = transport_i[0]["start"]
@@ -687,7 +734,7 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
                     try:
                         tools_return = innercity_transport.goto(city=target_city, start=source_poi, end=target_poi, start_time=start_time, transport_type="metro", verbose=False)
                     except:
-                        table_statistics.loc[0] = [1, 1, 1, 1]
+                        table_statistics.loc[0] = [1, 1, 1]
                         error_info.append("GoTo error city [{}], start [{}], end [{}], start_time [{}], transport_type [metro]".format(target_city, source_poi, target_poi, start_time))
                         continue
 
@@ -705,38 +752,55 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
                         except:
                             table_statistics.loc[0,  'Unavailable Inner-City Transport'] = 1
                             error_info.append("Incorrect infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
-                        if table_statistics.loc[0,  'Unavailable Inner-City Transport'] == 1:
-                            print(trans_ii)
-                            print(tools_return[idx])
-                            exit(0)
+
                         try:
 
                             if trans_ii["start_time"] != tools_return[idx]["start_time"] or trans_ii["end_time"] != tools_return[idx]["end_time"]:
-                                table_statistics.loc[0,  'Incorrect Duration Information of Inner-City Transport'] = 1
+                                table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                                 error_info.append("Incorrect duration infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
                             
                         except:
-                            table_statistics.loc[0,  'Incorrect Duration Information of Inner-City Transport'] = 1
+                            table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                             error_info.append("Incorrect duration infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
 
 
                         try:
 
                             if abs(trans_ii["price"] - tools_return[idx]["cost"]) > 0.1:
-                                table_statistics.loc[0,  'Incorrect Cost Information of Inner-City Transport'] = 1
+                                table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                                 error_info.append("Incorrect price infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
                         except:
-                            table_statistics.loc[0, 'Incorrect Cost Information of Inner-City Transport'] = 1
+                            table_statistics.loc[0, 'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                             error_info.append("Incorrect price infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
 
                         try:
 
                             if abs(trans_ii["distance"] - tools_return[idx]["distance"]) > 0.1:
-                                table_statistics.loc[0,  'Incorrect Distance Information of Inner-City Transport'] = 1
+                                table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                                 error_info.append("Incorrect distance infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
                         except:
-                            table_statistics.loc[0,  'Incorrect Distance Information of Inner-City Transport'] = 1
+                            table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                             error_info.append("Incorrect distance infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
+                        
+                        if trans_ii['mode'] == 'metro':
+                            try:
+                                trans_ii['tickets']
+                                trans_ii['cost']
+                                if trans_ii['price'] * trans_ii['tickets']!= trans_ii['cost']:
+                                    table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
+                                    error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=price*tickets] ".format(trans_ii))
+                            except:
+                                table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
+                                error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=price*tickets] ".format(trans_ii))
+                        elif trans_ii['mode'] == 'walk':
+                            try:
+                                trans_ii['cost']
+                                if trans_ii['cost']!= 0:
+                                    table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
+                                    error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=0] ".format(trans_ii))
+                            except:
+                                table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
+                                error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=0] ".format(trans_ii))
 
                     try:
                         if transport_i[0]["mode"] != "walk" or transport_i[2]["mode"] != "walk" or transport_i[1]["mode"] != "metro":
@@ -745,20 +809,16 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
                     except:
                         table_statistics.loc[0,  'Unavailable Inner-City Transport'] = 1
                         error_info.append("Incorrect transport type of transport {} -> {}".format(source_poi, target_poi))
-                    if table_statistics.loc[0,  'Unavailable Inner-City Transport'] == 1:
-                            print(trans_ii)
-                            print(tools_return[idx])
-                            exit(0)
-                    
+
                 elif len(transport_i)==1 and transport_i[0]["mode"] in ["walk", "taxi"]:
 
                     try:
                         tools_return = innercity_transport.goto(city=target_city, start=source_poi, end=target_poi, start_time=start_time, transport_type=transport_i[0]["mode"], verbose=False)
                         if not isinstance(tools_return, list):
-                            table_statistics.loc[0] = [1, 1, 1, 1]
+                            table_statistics.loc[0] = [1, 1, 1]
                             error_info.append("Can not find a path of transport {} -> {}".format(source_poi, target_poi))
                     except:
-                        table_statistics.loc[0] = [1, 1, 1, 1]
+                        table_statistics.loc[0] = [1, 1, 1]
                         error_info.append("GoTo error city [{}], start [{}], end [{}], start_time [{}], transport_type [metro]".format(target_city, source_poi, target_poi, start_time))
                         continue
                     for idx, trans_ii in enumerate(transport_i):
@@ -773,14 +833,11 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
                         except:
                             table_statistics.loc[0,  'Unavailable Inner-City Transport'] = 1
                             error_info.append("Incorrect infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
-                        if table_statistics.loc[0,  'Unavailable Inner-City Transport'] == 1:
-                            print(trans_ii)
-                            print(tools_return[idx])
-                            exit(0)
+
                         try:
 
                             if trans_ii["start_time"] != tools_return[idx]["start_time"] or trans_ii["end_time"] != tools_return[idx]["end_time"]:
-                                table_statistics.loc[0,  'Incorrect Duration Information of Inner-City Transport'] = 1
+                                table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                                 error_info.append("Incorrect duration infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
                             
                         except:
@@ -791,23 +848,41 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
                         try:
 
                             if abs(trans_ii["price"] - tools_return[idx]["cost"]) > 0.1:
-                                table_statistics.loc[0,  'Incorrect price Information of Inner-City Transport'] = 1
+                                table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                                 error_info.append("Incorrect price infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
                         except:
-                            table_statistics.loc[0,  'Incorrect price Information of Inner-City Transport'] = 1
+                            table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                             error_info.append("Incorrect price infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
 
                         try:
                             if abs(trans_ii["distance"] - tools_return[idx]["distance"]) > 0.1:
-                                table_statistics.loc[0,  'Incorrect Distance Information of Inner-City Transport'] = 1
+                                table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                                 error_info.append("Incorrect distance infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
                         except:
-                            table_statistics.loc[0,  'Incorrect Distance Information of Inner-City Transport'] = 1
+                            table_statistics.loc[0,  'Incorrect Information of Inner-City Transporton on price, distance, and duration'] = 1
                             error_info.append("Incorrect distance infomation of transport {} -> {}".format(source_poi, target_poi) + "  [{}], Tool: [{}]".format(trans_ii, tools_return[idx]))
 
-
+                        if trans_ii['mode'] == 'walk':
+                            try:
+                                trans_ii['cost']
+                                if trans_ii['cost']!= 0:
+                                    table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
+                                    error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=0] ".format(trans_ii))
+                            except:
+                                table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
+                                error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=0] ".format(trans_ii))
+                        elif trans_ii['mode'] == 'taxi':
+                            try:
+                                trans_ii['cost']
+                                trans_ii['cars']
+                                if trans_ii['price'] * trans_ii['cars'] != trans_ii['cost']:
+                                    table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
+                                    error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=price*cars] ".format(trans_ii))
+                            except:
+                                table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
+                                error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=price*cars] ".format(trans_ii))
                 else:
-                    table_statistics.loc[0] = [1, 1, 1, 1]
+                    table_statistics.loc[0] = [1, 1, 1]
                     error_info.append("Metro transport should be three-stages, Taxi or walk should be one-stage. {} -> {}".format(source_poi, target_poi))
 
                 # print("passed")
@@ -839,17 +914,17 @@ def Is_time_correct(symbolic_input, plan_json, verbose=False):
     target_city = symbolic_input["target_city"]
 
 
-    table_statistics = pd.DataFrame(columns=['Chronological Order'])
+    table_statistics = pd.DataFrame(columns=['Invalid duration information of each activity', 'Does not follow Chronological Order'])
 
     error_info = []    
     try: 
         plan_json["itinerary"]
     except: 
-        table_statistics.loc[0] = [1]
+        table_statistics.loc[0] = [1, 1]
         error_info = ["Error plan type, must be python dict"]
         return table_statistics, error_info
 
-    table_statistics.loc[0] = [0]
+    table_statistics.loc[0] = [0, 0]
 
     plan = plan_json["itinerary"]
     for day_plan_i in plan:
@@ -858,7 +933,7 @@ def Is_time_correct(symbolic_input, plan_json, verbose=False):
             # print(activity_i)
             try: activity_i["start_time"] and activity_i["end_time"]
             except: 
-                table_statistics.loc[0] = [1]
+                table_statistics.loc[0, 'Invalid duration information of each activity'] = 1
                 error_info = ["Activity should provide start_time and end_time"]
                 return table_statistics, error_info
     
@@ -866,7 +941,7 @@ def Is_time_correct(symbolic_input, plan_json, verbose=False):
             activity_ed_time = activity_i["end_time"]
 
             if time2real(activity_st_time) >= time2real(activity_ed_time) and (not activity_i["type"] in ["train", "airplane"]): # 可能出现次日到达
-                table_statistics.loc[0] = [1]
+                table_statistics.loc[0, 'Does not follow Chronological Order'] = 1
                 error_info.append("Activities must cost time: " + str(activity_i))
             
 
@@ -879,7 +954,7 @@ def Is_time_correct(symbolic_input, plan_json, verbose=False):
             
                 if time2real(activity_st_time) < time2real(transport_ed_time):
 
-                    table_statistics.loc[0] = [1]
+                    table_statistics.loc[0, 'Does not follow Chronological Order'] = 1
                     error_info.append("Must arrive at the location before starting the activity: " + str(activity_i))
 
             
@@ -900,7 +975,7 @@ def Is_space_correct(symbolic_input, plan_json, verbose=False):
     target_city = symbolic_input["target_city"]
 
 
-    table_statistics = pd.DataFrame(columns=['Transport information across positions'])
+    table_statistics = pd.DataFrame(columns=['Invalid Transport information across positions'])
 
     error_info = []    
     try: 
@@ -923,7 +998,7 @@ def Is_space_correct(symbolic_input, plan_json, verbose=False):
                 if "start" in activity_i:
                     current_position = activity_i["start"]
                 else:
-                    table_statistics.loc[0] = [1]
+                    table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
                     error_info.append("Every activity need a position key: ".format(activity_i))
                     continue
 
@@ -932,7 +1007,7 @@ def Is_space_correct(symbolic_input, plan_json, verbose=False):
                 
             if not "transports" in activity_i:
                 # print(activity_i)
-                table_statistics.loc[0] = [1]
+                table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
                 error_info.append("Need trasnports: ".format(activity_i))
 
             # try: activity_i["position"] and activity_i["transports"]
@@ -945,26 +1020,26 @@ def Is_space_correct(symbolic_input, plan_json, verbose=False):
             if (len(position_list) > 0) and position_i != position_list[-1]:
 
                 if not "transports" in activity_i:
-                    table_statistics.loc[0] = [1]
+                    table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
                     error_info.append("There must be transport between activities in different possitions: " + str(activity_i))
                     continue
 
                 if (len(activity_i["transports"]) < 1):
 
-                    table_statistics.loc[0] = [1]
+                    table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
                     error_info.append("There must be transport between activities in different possitions: " + str(activity_i))
                     continue
 
                 
                 if activity_i["transports"][0]["start"] != position_list[-1]:
 
-                    table_statistics.loc[0] = [1]
+                    table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
                     error_info.append("The origin of the transport must be equal to the position of the previous activity.: " + str(activity_i))
                     continue
 
                 if activity_i["transports"][-1]["end"] != position_i:
 
-                    table_statistics.loc[0] = [1]
+                    table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
                     error_info.append("The destination of the transport must be equal to the position of the current activity.: " + str(activity_i))
                     continue
 

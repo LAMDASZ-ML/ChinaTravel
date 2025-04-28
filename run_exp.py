@@ -25,7 +25,6 @@ if __name__ == "__main__":
         "-s",
         type=str,
         default="easy",
-        choices=["easy", "medium", "human"],
         help="query subset",
     )
     parser.add_argument("--index", "-id", type=str, default=None, help="query index")
@@ -37,7 +36,7 @@ if __name__ == "__main__":
         "-a",
         type=str,
         default=None,
-        choices=["RuleNeSy", "LLMNeSy", "ReAct", "Act"],
+        choices=["RuleNeSy", "LLMNeSy", "LLM-modulo", "ReAct", "Act"],
     )
     parser.add_argument(
         "--llm",
@@ -49,6 +48,7 @@ if __name__ == "__main__":
     
     parser.add_argument('--oracle_translation', action='store_true', help='Set this flag to enable oracle translation.')
     parser.add_argument('--preference_search', action='store_true', help='Set this flag to enable preference search.')
+    parser.add_argument('--refine_steps', type=int, default=10, help='Steps for refine-based method, such as LLM-modulo, Reflection')
 
     args = parser.parse_args()
 
@@ -63,6 +63,8 @@ if __name__ == "__main__":
     cache_dir = os.path.join(project_root_path, "cache")
 
     method = args.agent + "_" + args.llm
+    if args.agent == "LLM-modulo":
+        method += f"_{args.refine_steps}steps"
     if args.oracle_translation:
         method = method + "_oracletranslation"
     if args.preference_search:
@@ -89,6 +91,7 @@ if __name__ == "__main__":
         "cache_dir": cache_dir,
         "log_dir": log_dir, 
         "debug": True,
+        "refine_steps": args.refine_steps,
     }
     agent = init_agent(kwargs)
 
@@ -128,6 +131,10 @@ if __name__ == "__main__":
                 json_data=log, file_path=os.path.join(log_dir, f"{data_idx}.json")
             )
             succ = 1
+        elif args.agent in ["LLM-modulo"]:
+            
+            succ, plan = agent.solve(symbolic_input, prob_idx=data_idx, oracle_verifier=True)
+
         else:
             succ, plan = agent.run(symbolic_input, load_cache=True, oralce_translation=args.oracle_translation, preference_search=args.preference_search)
 
