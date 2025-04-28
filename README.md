@@ -18,8 +18,8 @@ Users can now load custom queries locally. When specifying non-default splits_na
 See detailed docs at [Evaluation README](chinatravel/symbol_verification/readme.md)  
 3. Introduced LLM-modulo baseline  
 Implement the LLM-modulo pipeline with a ground-truth symbolic verifier.  
-Based on methodology from:
-Paper: Robust Planning with Compound LLM Architectures: An LLM-Modulo Approach
+Based on methodology from:  
+Paper: Robust Planning with Compound LLM Architectures: An LLM-Modulo Approach  
 Codebase: https://github.com/Atharva-Gundawar/LLM-Modulo-prompts
 
 ## Quick Start
