@@ -6,18 +6,18 @@
 Official codebase for the paper "ChinaTravel: A Real-World Benchmark for Language Agents in Chinese Travel Planning".
 
 | [Webpage](https://www.lamda.nju.edu.cn/shaojj/chinatravel/) | [Paper](https://arxiv.org/abs/2412.13682) | [Dataset(Huggingface)](https://huggingface.co/datasets/LAMDA-NeSy/ChinaTravel), [Dataset(ModelScope)](https://www.modelscope.cn/datasets/Cbphcr/ChinaTravel) |
-
-![Overview](images/overview.png)
+<!-- 
+![Overview](images/overview.png) -->
 
 ## Changelog
 
 ### 2025.4
-1. Added local data loader
-Users can now load custom queries locally. When specifying non-default splits_name values (e.g., "abc") in run_exp, the system will automatically load corresponding files from evaluation/default_splits/abc.txt, where the TXT file contains the target query filenames.
-2. Detailed constraints classification.
-See detailed docs at Evaluation README
-Introduced LLM-modulo baseline
-3. Implement the LLM-modulo pipeline with a ground-truth symbolic verifier.
+1. Added local data loader   
+Users can now load custom queries locally. When specifying non-default splits_name values (e.g., "abc") in run_exp, the system will automatically load corresponding files from evaluation/default_splits/abc.txt, where the TXT file contains the target query filenames.  
+2. Detailed constraints classification.  
+See detailed docs at Evaluation README  
+3. Introduced LLM-modulo baseline  
+Implement the LLM-modulo pipeline with a ground-truth symbolic verifier.  
 Based on methodology from:
 Paper: Robust Planning with Compound LLM Architectures: An LLM-Modulo Approach
 Codebase: https://github.com/Atharva-Gundawar/LLM-Modulo-prompts
