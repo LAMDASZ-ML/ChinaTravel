@@ -15,7 +15,7 @@ Official codebase for the paper "ChinaTravel: A Real-World Benchmark for Languag
 1. Added local data loader   
 Users can now load custom queries locally. When specifying non-default splits_name values (e.g., "abc") in run_exp, the system will automatically load corresponding files from evaluation/default_splits/abc.txt, where the TXT file contains the target query filenames.  
 2. Detailed constraints classification.  
-See detailed docs at Evaluation README  
+See detailed docs at [Evaluation README](chinatravel/symbol_verification/readme.md)  
 3. Introduced LLM-modulo baseline  
 Implement the LLM-modulo pipeline with a ground-truth symbolic verifier.  
 Based on methodology from:
