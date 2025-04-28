@@ -64,7 +64,8 @@ python eval_exp.py --splits human --method LLMNeSy_deepseek
 
 ## Docs
 
-[Environment](chinatravel/environment/readme.md)
+[Environment](chinatravel/environment/readme.md)  
+[Constraints](chinatravel/symbol_verification/readme.md)  
 
 ## Contact
 
