@@ -6,3 +6,5 @@ results/
 eval_res/
 debug.sh
 eval_1000.sh
+human150.sh
+results.md

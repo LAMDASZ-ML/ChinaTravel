@@ -42,8 +42,7 @@ if __name__ == "__main__":
         "--llm",
         "-l",
         type=str,
-        default=None,
-        choices=["deepseek", "deepseekv25", "gpt-4o", "glm4-plus", "qwen", "mistral", "llama"],
+        default=None
     )
     
     parser.add_argument('--oracle_translation', action='store_true', help='Set this flag to enable oracle translation.')

@@ -164,7 +164,7 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                 try:
                     go_intercity_transport_plan['tickets']
                     go_intercity_transport_plan['cost']
-                    if go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] != go_intercity_transport_plan['cost']:
+                    if abs(go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] - go_intercity_transport_plan['cost']) > .1:
                         table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
                         error_info.append("Incorrect cost information of given intercity airplane (Go) [cost = price * tickets].")
                 except: 
@@ -210,7 +210,7 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                 try:
                     go_intercity_transport_plan['tickets']
                     go_intercity_transport_plan['cost']
-                    if go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] != go_intercity_transport_plan['cost']:
+                    if abs(go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] - go_intercity_transport_plan['cost']) > .1:
                         table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
                         error_info.append("Incorrect cost information of given intercity train (Go) [cost = price * tickets].")
                 except: 
@@ -265,7 +265,7 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                 try:
                     back_intercity_transport_plan['tickets']
                     back_intercity_transport_plan['cost']
-                    if back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] != back_intercity_transport_plan['cost']:
+                    if abs(back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] - back_intercity_transport_plan['cost']) > .1:
                         table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
                         error_info.append("Incorrect cost information of given intercity airplane (Back) [cost = price * tickets].")
                 except: 
@@ -310,7 +310,7 @@ def Is_intercity_transport_correct(symbolic_input, plan_json, verbose=False):
                 try:
                     back_intercity_transport_plan['tickets']
                     back_intercity_transport_plan['cost']
-                    if back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] != back_intercity_transport_plan['cost']:
+                    if abs(back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] - back_intercity_transport_plan['cost']) > .1:
                         table_statistics.loc[0,  "Incorrect Cost on Intercity Transportation"] = 1
                         error_info.append("Incorrect cost information of given intercity train (Back) [cost = price * tickets].")
                 except: 
@@ -413,7 +413,7 @@ def Is_attractions_correct(symbolic_input, plan_json, verbose=False):
             try: 
                 activity_i["tickets"]
                 activity_i["cost"]
-                if activity_i["price"] * activity_i["tickets"] != activity_i["cost"]:
+                if abs(activity_i["price"] * activity_i["tickets"] - activity_i["cost"]) > .1:
                     table_statistics.loc[0,  'Incorrect cost Information of attraction'] = 1
                     error_info.append("Incorrect cost information of attraction [cost = price * tickets].")
                         
@@ -426,7 +426,6 @@ def Is_attractions_correct(symbolic_input, plan_json, verbose=False):
             # attraction_names.add(activity["position"])
 
     if len(set(attraction_list)) != len(attraction_list):
-        # return return_info(False, "Attraction choices should not be repeated throughout the trip.")
         table_statistics.loc[0,  'Repeated attraction Choices'] = 1
         error_info.append("Attraction choices should not be repeated throughout the trip.")
 
@@ -510,7 +509,7 @@ def Is_hotels_correct(symbolic_input, plan_json, verbose=False):
             
             try:
                 activity_i["rooms"]
-                if activity_i["rooms"] * activity_i["price"] != activity_i["cost"]:
+                if abs(activity_i["rooms"] * activity_i["price"] - activity_i["cost"]) > .1:
                     table_statistics.loc[0,  'Incorrect cost Information of Accommodation'] = 1
                     error_info.append("Incorrect cost information of accommodation [cost = price * rooms].")
             except: 
@@ -604,7 +603,7 @@ def Is_restaurants_correct(symbolic_input, plan_json, verbose=False):
 
                 try:
                     activity_i["cost"]
-                    if symbolic_input["people_number"] * activity_i["price"] != activity_i["cost"]:
+                    if abs(symbolic_input["people_number"] * activity_i["price"] - activity_i["cost"]) > .1:
                         table_statistics.loc[0,  'Incorrect cost Information of Restruants'] = 1
                         error_info.append("Incorrect cost information of Restruants Events [cost = price * people_number].")
                 except:
@@ -631,9 +630,9 @@ def Is_restaurants_correct(symbolic_input, plan_json, verbose=False):
             try:
                 activity_i["start_time"]
                 activity_i["end_time"]
-                if activity_i["type"] == "lunch" and (time_compare_if_earlier_equal("13:00", activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], "11:00")):
+                if activity_i["type"] == "lunch" and (time_compare_if_earlier_equal("14:00", activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], "11:00")):
                     table_statistics.loc[0, 'Inappropriate Meal Times'] = 1
-                    error_info.append("The time of lunch should be in [11:00 -- 13:00]")
+                    error_info.append("The time of lunch should be in [11:00 -- 14:00]")
                 if activity_i["type"] == "dinner" and (time_compare_if_earlier_equal("20:00", activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], "17:00")):
                     table_statistics.loc[0,  'Inappropriate Meal Times'] = 1
                     error_info.append("The time of dinner should be in [17:00 -- 20:00]")
@@ -644,7 +643,7 @@ def Is_restaurants_correct(symbolic_input, plan_json, verbose=False):
 
             try:
                 activity_i["cost"]
-                if symbolic_input["people_number"] * activity_i["price"] != activity_i["cost"]:
+                if abs(symbolic_input["people_number"] * activity_i["price"] - activity_i["cost"]) > .1:
                     table_statistics.loc[0,  'Incorrect cost Information of Restruants'] = 1
                     error_info.append("Incorrect cost information of Restruants Events [cost = price * people_number].")
             except:
@@ -786,7 +785,7 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
                             try:
                                 trans_ii['tickets']
                                 trans_ii['cost']
-                                if trans_ii['price'] * trans_ii['tickets']!= trans_ii['cost']:
+                                if abs(trans_ii['price'] * trans_ii['tickets'] - trans_ii['cost']) > .1:
                                     table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
                                     error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=price*tickets] ".format(trans_ii))
                             except:
@@ -875,7 +874,7 @@ def Is_transport_correct(symbolic_input, plan_json, verbose=False):
                             try:
                                 trans_ii['cost']
                                 trans_ii['cars']
-                                if trans_ii['price'] * trans_ii['cars'] != trans_ii['cost']:
+                                if abs(trans_ii['price'] * trans_ii['cars'] - trans_ii['cost']) > .1:
                                     table_statistics.loc[0,  'Incorrect cost information of Inner-City Transport'] = 1
                                     error_info.append("Incorrect cost information of transport {} -> {}".format(source_poi, target_poi) + "  [{}], [cost=price*cars] ".format(trans_ii))
                             except:
