@@ -109,7 +109,10 @@ class LLMModuloAgent(BaseAgent):
             return []
         info = self.env(call_str)["data"]
 
-        # print(info)
+        # print(start, end, info)
+
+        if info == "No solution":
+            return info
 
         if len(info) == 3:
             info[1]["price"] = info[1]["cost"]
@@ -243,6 +246,8 @@ class LLMModuloAgent(BaseAgent):
                                         time_str,
                                         trans_type,
                                         )
+                    if transports_sel == "No solution":
+                        continue
                     selected_poi_innercity_transport_list.append((poi_a, poi_b, trans_type, transports_sel))
                     if len(transports_sel) > 0:
                         duration = calc_time_delta(transports_sel[0]["start_time"], transports_sel[-1]["end_time"])
@@ -299,6 +304,7 @@ class LLMModuloAgent(BaseAgent):
         # """
         # print(response)
         
+        response = """[{"day": 1,""" + response
         nl_plan = repair_json(response)
         # print(nl_plan)
         json_plan = json.loads(nl_plan)
@@ -328,6 +334,8 @@ class LLMModuloAgent(BaseAgent):
                 error_info.append(pe)
         
         print("ITER: ", 0, "ERROR:\n", error_info)
+
+        # exit(0)
 
         evaluated_plan["error_info"] = error_info
 
@@ -373,6 +381,7 @@ class LLMModuloAgent(BaseAgent):
             
             pre_time = time.time()
             response = self.backbone_llm([{"role": "user", "content": query_message}],one_line=False)
+            response = """[{"day": 1,""" + response
             
             self.llm_inference_time += time.time() - pre_time
             nl_plan = repair_json(response)

@@ -163,7 +163,9 @@ Innercity transports in the destination city
 {innercity_transport_info}
 
 Query: {query}
-Travel Plan (please only output the JSON string without explanatory information):"""
+Travel Plan (please only output the JSON string without explanatory information):
+[{{
+    "day": 1,"""
 
 
 BACK_PROMPT = """You are a proficient planner. Based on the provided information and query, please give me a detailed plan, including specifics such as flight numbers, train numbers, restaurant names, accommodation names and innercity routes. Note that all the information in your plan should be derived from the provided data. You should give a travel plan in JSON format as shown in the example below. Additionally, all details should align with commonsense. 
@@ -352,4 +354,6 @@ Travel Plan:
 There are some concerns: 
 {backprompt}
 
-Fixed Travel Plan (please only output the JSON string without explanatory information):"""
+Fixed Travel Plan (please only output the JSON string without explanatory information):
+[{{
+    "day": 1,"""

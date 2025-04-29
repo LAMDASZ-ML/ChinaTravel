@@ -3,6 +3,8 @@ from openai import OpenAI
 from json_repair import repair_json
 from transformers import AutoTokenizer
 
+from modelscope import AutoModelForCausalLM, AutoTokenizer
+
 from vllm import LLM, SamplingParams
 
 import sys
@@ -157,34 +159,83 @@ class GPT4o(AbstractLLM):
 
 
 class Qwen(AbstractLLM):
-    def __init__(self):
+    def __init__(self, model_name):
         super().__init__()
         self.path = os.path.join(
-            project_root_path, "chinatravel", "open_source_llm", "Qwen2.5-7B-Instruct"
+            project_root_path, "chinatravel", "local_llm", model_name
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
-        self.sampling_params = SamplingParams(
-            temperature=0, top_p=0.001, max_tokens=4096
-        )
-        self.llm = LLM(
-            model=self.path,
-            gpu_memory_utilization=0.95,
-        )
-        self.name = "Qwen"
+
+        if "Qwen3" in model_name:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+            self.llm = AutoModelForCausalLM.from_pretrained(
+                self.path,
+                torch_dtype="auto",
+                device_map="auto"
+            )
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+            self.sampling_params = SamplingParams(
+                temperature=0, top_p=0.001, max_tokens=4096
+            )
+            self.llm = LLM(
+                model=self.path,
+                gpu_memory_utilization=0.95,
+            )
+        self.name = model_name
 
     def _get_response(self, messages, one_line, json_mode):
         # print(messages)
-        text = self.tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
-        try:
-            res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
-            if json_mode:
-                res_str = repair_json(res_str, ensure_ascii=False)
-            elif one_line:
-                res_str = res_str.split("\n")[0]
-        except Exception as e:
-            res_str = '{"error": "Request failed, please try again."}'
+
+        if "Qwen3" in self.name:
+            text = self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+                enable_thinking=True # Switch between thinking and non-thinking modes. Default is True.
+            )
+            model_inputs = self.tokenizer([text], return_tensors="pt").to(self.llm.device)
+            # conduct text completion
+            generated_ids = self.llm.generate(
+                **model_inputs,
+                max_new_tokens=32768
+            )
+            output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
+
+            # parsing thinking content
+            try:
+                # rindex finding 151668 (</think>)
+                index = len(output_ids) - output_ids[::-1].index(151668)
+            except ValueError:
+                index = 0
+
+            thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
+            content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+
+            # print("thinking content:", thinking_content)
+            # print("content:", content)
+            res_str = content
+
+            try:
+                if json_mode:
+                    res_str = repair_json(res_str, ensure_ascii=False)
+                elif one_line:
+                    res_str = res_str.split("\n")[0]
+            except Exception as e:
+                res_str = '{"error": "Request failed, please try again."}'
+
+
+        else:
+            text = self.tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+            try:
+                res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
+                if json_mode:
+                    res_str = repair_json(res_str, ensure_ascii=False)
+                elif one_line:
+                    res_str = res_str.split("\n")[0]
+            except Exception as e:
+                res_str = '{"error": "Request failed, please try again."}'
         # print("---qwen_output---")
         # print(res_str)
         # print("---qwen_output_end---")

@@ -48,11 +48,6 @@ def return_info_test(flag, info):
 
 def collect_intercity_transport_error(symbolic_input, plan_json, verbose=False):
     
-    # print("input: ", symbolic_input)
-    # print("plan: ", plan_json)
-    
-    # table_statistics = pd.DataFrame(columns=['Invalid Trains', 'Invalid Airplanes', 'Incorrect Cost of Intercity Transport', 'Incorrect Schedule of Intercity Transport'])
-
     error_info = []
 
     if not isinstance(plan_json, dict):
@@ -76,31 +71,27 @@ def collect_intercity_transport_error(symbolic_input, plan_json, verbose=False):
 
     # must contain intecity transport
     if len(first_day_plan["activities"])==0 or len(last_day_plan["activities"])==0: 
-        error_info = ["The plan does not provide the intecity transport."]
+        error_info = ["The plan does not provide the intecity transport at the first and last day."]
         return error_info
     
     go_intercity_transport_plan=first_day_plan["activities"][0]
     back_intercity_transport_plan=last_day_plan["activities"][-1]
     if("FlightID" not in go_intercity_transport_plan.keys()) and ("TrainID" not in go_intercity_transport_plan.keys()): 
-        # return return_info(False, "The first activity should be a transport.") # "The first transport should be from origin to destination.")
         error_info = ["The first activity should be an intercity transport."]
         return error_info
     
     if("FlightID" not in back_intercity_transport_plan.keys()) and ("TrainID" not in back_intercity_transport_plan.keys()): 
-        # return return_info(False, "The last activity should be a transport.") # "The last transport should be from destination to origin.")
         error_info = ["The last activity should be an intercity transport."]
         return error_info
 
 
     go_type=go_intercity_transport_plan['type']
     if go_type!='airplane' and go_type!='train':
-        # return return_info(False, "Intercity transport type should be airplane or train")
         error_info = ["Intercity transport type should be airplane or train."]
         return error_info
     
     back_type=back_intercity_transport_plan['type']
     if back_type!='airplane' and back_type!='train':
-        # return return_info(False, "Intercity transport type should be airplane or train")
         error_info = ["Intercity transport type should be airplane or train."]
         return error_info
     
@@ -149,10 +140,10 @@ def collect_intercity_transport_error(symbolic_input, plan_json, verbose=False):
                 try: 
                     go_intercity_transport_plan['cost']
                     go_intercity_transport_plan['tickets']
-                    if go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] != go_intercity_transport_plan['cost']:
+                    if abs(go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] - go_intercity_transport_plan['cost']) > .1:
                         error_info.append(f"Incorrect cost information of given intercity transport from origin to destination {go_intercity_transport_plan['FlightID']} [cost = price * tickets].")
                 except: 
-                    error_info.append(f"Intercity transport from origin to destination {go_intercity_transport_plan['FlightID']} should provide the cost information [cost = price * tickets].")
+                    error_info.append(f"Intercity transport from origin to destination {go_intercity_transport_plan['FlightID']} should provide the tickets and cost information. [cost = price * tickets].")
 
                 break
         if go_type=='train':
@@ -184,10 +175,11 @@ def collect_intercity_transport_error(symbolic_input, plan_json, verbose=False):
                     error_info.append(f"Intercity from origin to destination {go_intercity_transport_plan['TrainID']} should provide the price information.")
                 try: 
                     go_intercity_transport_plan['cost']
-                    if go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] != go_intercity_transport_plan['cost']:
+                    go_intercity_transport_plan['tickets']
+                    if abs(go_intercity_transport_plan['price'] * go_intercity_transport_plan['tickets'] - go_intercity_transport_plan['cost']) > .1:
                         error_info.append(f"Incorrect cost information of given intercity transport from origin to destination {go_intercity_transport_plan['TrainID']} [cost = price * tickets].")
                 except: 
-                    error_info.append(f"Intercity transport from origin to destination {go_intercity_transport_plan['TrainID']} should provide the cost information [cost = price * tickets].")
+                    error_info.append(f"Intercity transport from origin to destination {go_intercity_transport_plan['TrainID']} should provide the tickets and cost information. [cost = price * tickets].")
 
                 break
 
@@ -229,11 +221,12 @@ def collect_intercity_transport_error(symbolic_input, plan_json, verbose=False):
                 
                 
                 try: 
+                    back_intercity_transport_plan['tickets']
                     back_intercity_transport_plan['cost']
-                    if back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] != back_intercity_transport_plan['cost']:
+                    if abs(back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] - back_intercity_transport_plan['cost']) > .1:
                         error_info.append(f"Incorrect cost information of given intercity transport from destination to origin {back_intercity_transport_plan['FlightID']} [cost = price * tickets].")
                 except: 
-                    error_info.append(f"Intercity transport from destination to origin {back_intercity_transport_plan['FlightID']} should provide the cost information [cost = price * tickets].")
+                    error_info.append(f"Intercity transport from destination to origin {back_intercity_transport_plan['FlightID']} should provide the tickets and cost information. [cost = price * tickets].")
 
                 break
 
@@ -268,11 +261,12 @@ def collect_intercity_transport_error(symbolic_input, plan_json, verbose=False):
                 
                 
                 try: 
+                    back_intercity_transport_plan['tickets']
                     back_intercity_transport_plan['cost']
-                    if back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] != back_intercity_transport_plan['cost']:
+                    if abs(back_intercity_transport_plan['price'] * back_intercity_transport_plan['tickets'] - back_intercity_transport_plan['cost']) > .1:
                         error_info.append("Incorrect cost information of given intercity transport from destination to origin [cost = price * tickets].")
                 except: 
-                    error_info.append(f"Intercity transport from destination to origin {back_intercity_transport_plan['TrainID']} should provide the cost information [cost = price * tickets].")
+                    error_info.append(f"Intercity transport from destination to origin {back_intercity_transport_plan['TrainID']} should provide the tickets and cost information [cost = price * tickets].")
 
                 break
     
@@ -292,9 +286,6 @@ def collect_attractions_error(symbolic_input, plan_json, verbose=False):
     
     target_city = symbolic_input["target_city"]
 
-
-    # table_statistics = pd.DataFrame(columns=['Unavailable attractions', 'Visiting attraction in their closed time', 'Repeated attraction Choices', 'Incorrect price Information of attraction'])
-
     error_info = []    
     try: 
         plan_json["itinerary"]
@@ -308,7 +299,6 @@ def collect_attractions_error(symbolic_input, plan_json, verbose=False):
 
     plan = plan_json["itinerary"]
     
-    # table_statistics.loc[0] = [0, 0, 0, 0]
     attraction_list = []
 
     for day_i, day_plan_i in enumerate(plan):
@@ -320,19 +310,14 @@ def collect_attractions_error(symbolic_input, plan_json, verbose=False):
             if activity_i["type"] != "attraction":
                 continue
             
-            # print(activity_i)
             try: activity_i['position']
             except: 
-                # table_statistics.loc[0] = [1, 1, 1, 1]
                 error_info.append(f"No position information in attraction activity, day {day_i+1}.")
                 continue
             
             select_attraction=attractions.select(target_city,key='name',func=lambda x:x==activity_i['position'])
 
-            # print(select_attraction)
-
             if select_attraction.empty:
-                # table_statistics.loc[0] = [1, 1, 1, 1]
                 error_info.append(f"Attraction activity, {activity_i['position']}, in day {day_i+1} is not valid in the provided information.")
                 continue
 
@@ -347,37 +332,36 @@ def collect_attractions_error(symbolic_input, plan_json, verbose=False):
                 activity_i["end_time"]
 
                 if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
-                    # return return_info(False, "The attraction is closed now. {}, open time: [{} -- {}]".format(activity_i['position'], opentime, endtime))
-                    # table_statistics.loc[0,  'Visiting attraction in their closed time'] = 1
                     error_info.append(f"The attraction, {activity_i['position']} in day {day_i+1}, is closed when you visiting. Its open time is [{opentime} -- {endtime}]")
                 
             except:
-                # table_statistics.loc[0,  'Visiting attraction in their closed time'] = 1
                 error_info.append(f"The attraction activity, {activity_i['position']} in day {day_i+1}, shoud provide the visiting time.")
 
             # 返回信息保证一致: price
             try: 
                 activity_i["price"]
                 if int(activity_i["price"]) != int(select_attraction["price"].values[0]):
-                    # return return_info(False, "Incorrect cost infomation of attraction [{}], cost: {} ".format(activity_i['position'], activity_i["cost"]))
-                    # table_statistics.loc[0,  'Incorrect price Information of attraction'] = 1
                     error_info.append(f"Incorrect price infomation of attraction ,{activity_i['position']} in day {day_i+1}.")
 
             except: 
                 # table_statistics.loc[0,  'Incorrect price Information of attraction'] = 1
                 error_info.append(f"The attraction activity, {activity_i['position']} in day {day_i+1}, shoud provide the price information.")
 
-            # if not select_attraction_type.empty:
-            #     spot_type.add(select_attraction_type.iloc[0])
-            # attraction_names.add(activity["position"])
+            try: 
+                activity_i["tickets"]
+                activity_i["cost"]
+                if abs(activity_i["price"] * activity_i["tickets"] - activity_i["cost"]) > .1:
+                    error_info.append(f"Incorrect cost information of attraction activity, {activity_i['position']} in day {day_i+1}, [cost = price * tickets].")
+                        
+            except: 
+                error_info.append(f"Incorrect cost information of attraction activity, {activity_i['position']} in day {day_i+1}, [cost = price * tickets].")
+
+
 
     if len(set(attraction_list)) != len(attraction_list):
-        # return return_info(False, "Attraction choices should not be repeated throughout the trip.")
-        # table_statistics.loc[0,  'Repeated attraction Choices'] = 1
         error_info.append("Attraction choices should not be repeated throughout the trip.")
 
     if verbose:
-        # if table_statistics.loc[0].sum() == 0:
         if len(error_info) == 0: 
             print("Attractions passed!")
         else:
@@ -389,8 +373,6 @@ def collect_attractions_error(symbolic_input, plan_json, verbose=False):
 def collect_hotels_error(symbolic_input, plan_json, verbose=False): 
 
     target_city = symbolic_input["target_city"]
-    # table_statistics = pd.DataFrame(columns=['Unavailable Accommodation', 'Room information does not meet headcounts.', 'Incorrect price Information of Accommodation'])
-
     error_info = []    
     try: 
         plan_json["itinerary"]
@@ -401,8 +383,6 @@ def collect_hotels_error(symbolic_input, plan_json, verbose=False):
     if type(plan_json["itinerary"])!= list:
         error_info = ["Format Error. Please strictly follow the instructions in the prompt."]
         return error_info
-
-    # table_statistics.loc[0] = [0, 0, 0]
 
     plan = plan_json["itinerary"]
     
@@ -425,7 +405,6 @@ def collect_hotels_error(symbolic_input, plan_json, verbose=False):
                 continue
             
             select_hotel=accommodation.select(target_city,key='name',func=lambda x:x==activity_i['position'])
-            # print(select_hotel)
 
             if select_hotel.empty:
                 error_info.append(f"Accommodation activity, {activity_i['position']}, in day {day_i+1} is not valid in the provided information.")
@@ -438,7 +417,6 @@ def collect_hotels_error(symbolic_input, plan_json, verbose=False):
             try: 
                 activity_i["price"]
                 if activity_i["price"] != select_hotel["price"].values[0]:
-                    # table_statistics.loc[0,  'Incorrect price Information of Accommodation'] = 1
                     error_info.append(f"Incorrect price infomation of accommodation ,{activity_i['position']} in day {day_i+1}.")
             except: 
                 error_info.append(f"The accommodation activity, {activity_i['position']} in day {day_i+1}, shoud provide the price information.")
@@ -448,51 +426,32 @@ def collect_hotels_error(symbolic_input, plan_json, verbose=False):
                 if type(activity_i["room_type"]) != int:
                     error_info.append(f"Incorrect room_type infomation of accommodation activity, {activity_i['position']} in day {day_i+1}. The room type should be an integer, equaling to the num_bed information of the selected accommodation.")
                 if activity_i["room_type"] != select_hotel["numbed"].values[0]:
-                    # table_statistics.loc[0,  'Room information does not meet headcounts.'] = 1
                     error_info.append(f"Incorrect room_type infomation of accommodation activity, {activity_i['position']} in day {day_i+1}. The room type should be an integer, equaling to the num_bed information of the selected accommodation.")
                 
             except: 
                 error_info.append(f"The accommodation activity, {activity_i['position']} in day {day_i+1}, shoud provide the room_type information. The room type should be an integer, equaling to the num_bed information of the selected accommodation.")
 
             
+            try:
+                activity_i["rooms"]
+                if abs(activity_i["rooms"] * activity_i["price"] - activity_i["cost"]) > .1:
+                    error_info.append("Incorrect cost information of accommodation. [cost = price * rooms]")
+            except: 
+                table_statistics.loc[0,  'Incorrect cost Information of Accommodation'] = 1
+                error_info.append("Cost and rooms information should be provided. [cost = price * rooms]")
             
-            # limit_rooms, limits_room_type = symbolic_input["limit_rooms"], symbolic_input["limits_room_type"]
-
-            # if limit_rooms and limits_room_type:
-            #     pass
-            # else:               
-            #     room_type = activity_i["room_type"]
-            #     rooms = activity_i["rooms"]
-            #     # people_number = int(symbolic_input["hard_logic"][1].split("==")[1])
-            #     # people_number_idx = 1
-            #     # for i, l in enumerate(symbolic_input["hard_logic"]):
-            #     #     if "people_number" in l:
-            #     #         people_number_idx = i
-            #     # people_number = int(symbolic_input["hard_logic"][people_number_idx].split("==")[1])
-            #     people_number = symbolic_input["people_number"]
-            
-            #     if (room_type * rooms >= people_number) and (room_type * rooms < people_number + room_type):
-            #         pass
-            #     else:
-            #         table_statistics.loc[0,  'Room information does not meet headcounts.'] = 1
-            #         error_info.append("Incorrect room infomation for {} people, given rooms: {}, numbed: {} ".format(people_number, rooms, room_type))
 
     if len(set(hotel_list)) > 1:
-        # return return_info(False, "Hotel should be unique during the trip.")
-        # table_statistics.loc[0] = [1, 1, 1]
         error_info.append("Accommodation should be unique during the trip.")
     
     if len(plan_json["itinerary"]) > 1 and len(hotel_list) == 0:
-        # table_statistics.loc[0] = [1, 1, 1]
         error_info.append("We need a hotel for a trip more than one day.")
         
     if verbose:
-        # if table_statistics.loc[0].sum() == 0:
         if len(error_info) == 0:
             print("Hotels passed!")
         else:
             print(error_info)
-            # print(table_statistics)
     return error_info
 
 def collect_restaurants_error(symbolic_input, plan_json, verbose=False): 
@@ -555,11 +514,21 @@ def collect_restaurants_error(symbolic_input, plan_json, verbose=False):
                     activity_i["start_time"]
                     activity_i["end_time"]
 
-                    if time_compare_if_earlier_equal("09:00", activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], "06:00"):
-                        error_info.append(f"The time of breakfast activity, {activity_i['position']} in day {day_i+1}, should be in [06:00 -- 09:00].")
+                    if time_compare_if_earlier_equal("09:00", activity_i["start_time"]):
+                        error_info.append(f"The start_time of breakfast activity, {activity_i['position']} in day {day_i+1}, cannot be later than 09:00.")
+                        
+                    if time_compare_if_earlier_equal(activity_i["end_time"], "06:00"):
+                        error_info.append(f"The end_time of breakfast activity, {activity_i['position']} in day {day_i+1}, cannot be earlier than 06:00.")
 
                 except:
-                    error_info.append(f"The time of breakfast activity, {activity_i['position']} in day {day_i+1}, should be provided")
+                    error_info.append(f"The start_time and end_time of breakfast activity, {activity_i['position']} in day {day_i+1}, should be provided")
+
+                try:
+                    activity_i["cost"]
+                    if abs(symbolic_input["people_number"] * activity_i["price"] - activity_i["cost"]) > .1:
+                        error_info.append("Incorrect cost information of Restruants Events [cost = price * people_number].")
+                except:
+                    error_info.append("The Restruants Events should provide cost information")
 
                 continue
             
@@ -582,23 +551,29 @@ def collect_restaurants_error(symbolic_input, plan_json, verbose=False):
             try:
                 activity_i["start_time"]
                 activity_i["end_time"]
-                if activity_i["type"] == "lunch" and (time_compare_if_earlier_equal("13:00", activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], "11:00")):
-                    # table_statistics.loc[0, 'Inappropriate Meal Times'] = 1
-                    # error_info.append("The time of lunch should be in [11:00 -- 13:00]")
-                    error_info.append(f"The time of lunch activity, {activity_i['position']} in day {day_i+1}, should be in [11:00 -- 13:00].")
+                if activity_i["type"] == "lunch":
+                    if time_compare_if_earlier_equal("14:00", activity_i["start_time"]):
+                        error_info.append(f"The start_time of lunch activity, {activity_i['position']} in day {day_i+1}, cannot be later than 14:00.")
+                    
+                    if time_compare_if_earlier_equal(activity_i["end_time"], "11:00"):
+                        error_info.append(f"The end_time of lunch activity, {activity_i['position']} in day {day_i+1}, cannot be earlier than 11:00.")
 
-                if activity_i["type"] == "dinner" and (time_compare_if_earlier_equal("20:00", activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], "17:00")):
-                    # table_statistics.loc[0,  'Inappropriate Meal Times'] = 1
-                    # error_info.append("The time of dinner should be in [17:00 -- 20:00]")
-                    error_info.append(f"The time of dinner activity, {activity_i['position']} in day {day_i+1}, should be in [17:00 -- 20:00].")
+                if activity_i["type"] == "dinner":
+                    if time_compare_if_earlier_equal("20:00", activity_i["start_time"]):
+                        error_info.append(f"The start_time of dinner activity, {activity_i['position']} in day {day_i+1}, cannot be later than 20:00.")
+                    
+                    if time_compare_if_earlier_equal(activity_i["end_time"], "17:00"):
+                        error_info.append(f"The end_time of dinner activity, {activity_i['position']} in day {day_i+1}, cannot be earlier than 17:00.")
 
             except:
-                # table_statistics.loc[0,  'Inappropriate Meal Times'] = 1
-                # error_info.append("Schedule of Restruants should be provided")
-                error_info.append(f"The restruant activity, {activity_i['position']} in day {day_i+1}, shoud provide the visiting time.")
-            # if not select_attraction_type.empty:
-            #     spot_type.add(select_attraction_type.iloc[0])
-            # attraction_names.add(activity["position"])
+                error_info.append(f"The restruant activity, {activity_i['position']} in day {day_i+1}, shoud provide the start_time and end_time.")
+            
+            try:
+                activity_i["cost"]
+                if abs(symbolic_input["people_number"] * activity_i["price"] - activity_i["cost"]) > .1:
+                    error_info.append("Incorrect cost information of Restruants Events [cost = price * people_number].")
+            except:
+                error_info.append("The Restruants Events should provide cost information")
             
             # 开放时间
             opentime, endtime = select_restaurant["opentime"].values[0],  select_restaurant["endtime"].values[0]
@@ -612,7 +587,7 @@ def collect_restaurants_error(symbolic_input, plan_json, verbose=False):
             except:
                 # table_statistics.loc[0,  'Visiting Restruants in their closed time'] = 1
                 # error_info.append("Schedule of Restruants should be provided")
-                error_info.append(f"The restruant activity, {activity_i['position']} in day {day_i+1}, shoud provide the visiting time.")
+                error_info.append(f"The restruant activity, {activity_i['position']} in day {day_i+1}, shoud provide the start_time and end_time.")
 
             restaurants_list.append(activity_i['position'])
             # restaurants_time_list.append(activity_i["start_time"])
@@ -639,7 +614,6 @@ def collect_transport_error(symbolic_input, plan_json, verbose=False):
     
 
     target_city = symbolic_input["target_city"]
-    # table_statistics = pd.DataFrame(columns=['Unavailable Inner-City Transport', 'Incorrect price Information of Inner-City Transport', 'Incorrect Distance Information of Inner-City Transport', 'Incorrect Duration Information of Inner-City Transport'])
 
     error_info = []    
     try: 
@@ -651,8 +625,6 @@ def collect_transport_error(symbolic_input, plan_json, verbose=False):
     if type(plan_json["itinerary"])!= list:
         error_info = ["Format Error. Please strictly follow the instructions in the prompt."]
         return error_info
-
-    # table_statistics.loc[0] = [0, 0, 0, 0]
 
     plan = plan_json["itinerary"]
     for day_i, day_plan_i in enumerate(plan):
@@ -693,8 +665,8 @@ def collect_transport_error(symbolic_input, plan_json, verbose=False):
                     total_price = 0
                     for item in tools_return:
                         total_price += item["cost"]
-                    if transport_i["cost"] != total_price * symbolic_input["people_number"]:
-                        error_info.append(f"Incorrect cost infomation of innercity transport in day {day_i+1}, from {source_poi} to {target_poi}, metro")
+                    if abs(transport_i["cost"] - total_price * symbolic_input["people_number"]) > .1:
+                        error_info.append(f"Incorrect cost infomation of innercity transport in day {day_i+1}, from {source_poi} to {target_poi}, metro. [cost = price * people_number]")
                 else:
                     try:
                         tools_return = innercity_transport.goto(city=target_city, start=source_poi, end=target_poi, start_time=start_time, transport_type=transport_i['mode'], verbose=False)
@@ -705,8 +677,8 @@ def collect_transport_error(symbolic_input, plan_json, verbose=False):
                         real_cost = tools_return[0]["cost"] * math.ceil(symbolic_input["people_number"]/4)
                     else:
                         real_cost = 0
-                    if transport_i["cost"] != real_cost:
-                        error_info.append(f"Incorrect cost infomation of innercity transport in day {day_i+1}, from {source_poi} to {target_poi}, {transport_i['mode']}")
+                    if abs(transport_i["cost"] - real_cost) > .1:
+                        error_info.append(f"Incorrect cost infomation of innercity transport in day {day_i+1}, from {source_poi} to {target_poi}, {transport_i['mode']}. [cost = price * math.ceil(people_number/4)]")
                 
                 # print("passed")
 

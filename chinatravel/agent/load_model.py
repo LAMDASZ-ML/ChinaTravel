@@ -73,8 +73,8 @@ def init_llm(llm_name):
         llm = GPT4o()
     elif llm_name == "glm4-plus":
         llm = GLM4Plus()
-    elif llm_name == "qwen":
-        llm = Qwen()
+    elif "Qwen" in llm_name:
+        llm = Qwen(llm_name)
     elif llm_name == "mistral":
         llm = Mistral()
     elif llm_name == "llama":
