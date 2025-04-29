@@ -255,6 +255,7 @@ class Transportation:
             if stationA == stationB:
                 if verbose:
                     print("Too near. Walk.")
+                return ["Too close. No metro solution."]
                 return self.goto(
                     city_cn,
                     locationA_name,
