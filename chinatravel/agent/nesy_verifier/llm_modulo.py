@@ -327,11 +327,17 @@ class LLMModuloAgent(BaseAgent):
         error_info = collect_commonsense_constraints_error(problem, evaluated_plan, verbose=False)
 
         if not "Format Error. Please strictly follow the instructions in the prompt." in error_info:
-            evaluated_plan['itinerary'] = self.translate_innercity_transport(evaluated_plan['itinerary'], problem)
-            personal_error_info = collect_personal_error(problem, evaluated_plan, verbose=False)
 
-            for pe in personal_error_info:
-                error_info.append(pe)
+            try:
+                evaluated_plan['itinerary'] = self.translate_innercity_transport(evaluated_plan['itinerary'], problem)
+                personal_error_info = collect_personal_error(problem, evaluated_plan, verbose=False)
+
+                for pe in personal_error_info:
+                    error_info.append(pe)
+            except exception as e:
+                print("Error in translating innercity transport: ", e)
+                    error_info.append("Format Error on Innercity Transport Information. Please strictly follow the instructions in the prompt.")
+
         
         print("ITER: ", 0, "ERROR:\n", error_info)
 
