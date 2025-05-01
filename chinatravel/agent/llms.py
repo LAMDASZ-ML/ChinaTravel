@@ -166,18 +166,20 @@ class Qwen(AbstractLLM):
             project_root_path, "chinatravel", "local_llm", model_name
         )
         os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1" 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
         if "Qwen3" in model_name:    
             self.sampling_params = SamplingParams(temperature=0.6, top_p=0.95, top_k=20, max_tokens=4096)
+            config = AutoConfig.from_pretrained(self.path)
+            config.rope_scaling = {
+                "type": "yarn", 
+                "factor": 2.0,  # 原长 32,768 → 扩展到 32,768 * 2 = 65536
+                "original_max_position_embeddings": 32768
+            }
+            config.save_pretrained(self.path)
         else:
             self.sampling_params = SamplingParams(temperature=0, top_p=0.001, max_tokens=4096)
         
-        config = AutoConfig.from_pretrained(self.path)
-        config.rope_scaling = {
-            "type": "yarn", 
-            "factor": 2.0,  # 原长 32,768 → 扩展到 32,768 * 2 = 65536
-            "original_max_position_embeddings": 32768
-        }
+        
+        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
         self.llm = LLM(
                 model=self.path,
                 gpu_memory_utilization=0.9,
