@@ -86,7 +86,7 @@ For each flight transport, include the FlightID.
 
 ***** Example *****
 The user's requirement are: 当前位置北京。我和女朋友打算去上海玩两天，预算5300元，希望酒店每晚不超过500元。请给我一个旅行规划。
-Selected Transports: ["G159", "FL81", "FL083", "FL090", "FL082", "D7", "G101", "G103", "G115", "Z281"]
+Selected Transports from 北京 to 上海 : ["G159", "FL81", "FL083", "FL090", "FL082", "D7", "G101", "G103", "G115", "Z281"]
 ***** Example Ends *****
 Given information: 
 
@@ -116,7 +116,7 @@ For each flight transport, include the FlightID.
 
 ***** Example *****
 The user's requirement are: 当前位置北京。我和女朋友打算去上海玩两天，预算5300元，希望酒店每晚不超过500元。请给我一个旅行规划。
-Selected Transports: ["G2", "FL009", "FL007", "FL001", "FL004", "G8", "G18", "G26", "G6", "D6"]
+Selected Transports from 上海 to 北京 : ["G2", "FL009", "FL007", "FL001", "FL004", "G8", "G18", "G26", "G6", "D6"]
 ***** Example Ends *****
 Given information: 
 
