@@ -2,11 +2,12 @@ from abc import ABC, abstractmethod
 from openai import OpenAI
 from json_repair import repair_json
 from transformers import AutoTokenizer
+from transformers import AutoConfig
 
-from modelscope import AutoModelForCausalLM, AutoTokenizer
+# from modelscope import AutoModelForCausalLM, AutoTokenizer
 
 from vllm import LLM, SamplingParams
-
+import re
 import sys
 import os
 
@@ -164,22 +165,24 @@ class Qwen(AbstractLLM):
         self.path = os.path.join(
             project_root_path, "chinatravel", "local_llm", model_name
         )
-
-        if "Qwen3" in model_name:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.path)
-            self.llm = AutoModelForCausalLM.from_pretrained(
-                self.path,
-                torch_dtype="auto",
-                device_map="auto"
-            )
+        os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1" 
+        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+        if "Qwen3" in model_name:    
+            self.sampling_params = SamplingParams(temperature=0.6, top_p=0.95, top_k=20, max_tokens=4096)
         else:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.path)
-            self.sampling_params = SamplingParams(
-                temperature=0, top_p=0.001, max_tokens=4096
-            )
-            self.llm = LLM(
+            self.sampling_params = SamplingParams(temperature=0, top_p=0.001, max_tokens=4096)
+        
+        config = AutoConfig.from_pretrained(self.path)
+        config.rope_scaling = {
+            "type": "yarn", 
+            "factor": 2.0,  # 原长 32,768 → 扩展到 32,768 * 2 = 65536
+            "original_max_position_embeddings": 32768
+        }
+        self.llm = LLM(
                 model=self.path,
-                gpu_memory_utilization=0.95,
+                gpu_memory_utilization=0.9,
+                max_model_len=65536,  # 强制上下文长度为 65536
+                enable_prefix_caching=True,  # 可选：启用前缀缓存优化长文本
             )
         self.name = model_name
 
@@ -193,49 +196,34 @@ class Qwen(AbstractLLM):
                 add_generation_prompt=True,
                 enable_thinking=True # Switch between thinking and non-thinking modes. Default is True.
             )
-            model_inputs = self.tokenizer([text], return_tensors="pt").to(self.llm.device)
             # conduct text completion
-            generated_ids = self.llm.generate(
-                **model_inputs,
-                max_new_tokens=32768
-            )
-            output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
+            outputs = self.llm.generate([text], self.sampling_params)
 
-            # parsing thinking content
+
+            generated_text = outputs[0].outputs[0].text
+            # print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
+            # print(generated_text)
             try:
-                # rindex finding 151668 (</think>)
-                index = len(output_ids) - output_ids[::-1].index(151668)
-            except ValueError:
-                index = 0
+                m = re.match(r"<think>\n(.+)</think>\n\n", generated_text, flags=re.DOTALL)
+                content = generated_text[len(m.group(0)):]
+                thinking_content = m.group(1).strip()
 
-            thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-            content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
-
-            # print("thinking content:", thinking_content)
-            # print("content:", content)
-            res_str = content
-
-            try:
-                if json_mode:
-                    res_str = repair_json(res_str, ensure_ascii=False)
-                elif one_line:
-                    res_str = res_str.split("\n")[0]
             except Exception as e:
-                res_str = '{"error": "Request failed, please try again."}'
-
-
+                thinking_content = ""
+                content = generated_text.strip()
+            res_str = content
         else:
             text = self.tokenizer.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True
             )
-            try:
-                res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
-                if json_mode:
-                    res_str = repair_json(res_str, ensure_ascii=False)
-                elif one_line:
-                    res_str = res_str.split("\n")[0]
-            except Exception as e:
-                res_str = '{"error": "Request failed, please try again."}'
+            res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
+        try:
+            if json_mode:
+                res_str = repair_json(res_str, ensure_ascii=False)
+            elif one_line:
+                res_str = res_str.split("\n")[0]
+        except Exception as e:
+            res_str = '{"error": "Request with specific format failed, please try again."}'
         # print("---qwen_output---")
         # print(res_str)
         # print("---qwen_output_end---")
