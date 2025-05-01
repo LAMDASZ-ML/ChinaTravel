@@ -182,7 +182,7 @@ class Qwen(AbstractLLM):
                 model=self.path,
                 gpu_memory_utilization=0.9,
                 max_model_len=65536,  # 强制上下文长度为 65536
-                enable_prefix_caching=True,  # 可选：启用前缀缓存优化长文本
+                # enable_prefix_caching=True,  # 可选：启用前缀缓存优化长文本
             )
         self.name = model_name
 
