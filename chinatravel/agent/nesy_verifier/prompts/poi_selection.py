@@ -97,7 +97,7 @@ Flight Information
 {flight_info}
 
 The user's requirement are: {user_requirements}
-Selected Transports: (please only output the LIST of TRANSPORT ID without explanatory information):"""
+Selected Transports from {origin} to {destination} : (please only output the LIST of TRANSPORT ID without explanatory information):"""
 
 
 
@@ -127,5 +127,5 @@ Flight Information
 {flight_info}
 
 The user's requirement are: {user_requirements}
-Selected Transports: (please only output the LIST of TRANSPORT ID without explanatory information):"""
+Selected Transports from {origin} to {destination} : (please only output the LIST of TRANSPORT ID without explanatory information):"""
 

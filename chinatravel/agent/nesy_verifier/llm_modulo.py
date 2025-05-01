@@ -565,7 +565,7 @@ class LLMModuloAgent(BaseAgent):
         flight_info_str = flight_info.to_csv(sep='\t', na_rep='nan', index=False)
         time_before = time.time()
 
-        query_message=[{"role": "user", "content": TRANSPORT_GO_SELECTION_INSTRUCTION.format(required_options=required_num, user_requirements=query["nature_language"], train_info=train_info_str, flight_info=flight_info_str)}]
+        query_message=[{"role": "user", "content": TRANSPORT_GO_SELECTION_INSTRUCTION.format(origin=query["source_city"], destination=query["target_city"], required_options=required_num, user_requirements=query["nature_language"], train_info=train_info_str, flight_info=flight_info_str)}]
         answer = self.backbone_llm(query_message,one_line=False)
         print(answer)
 
@@ -601,7 +601,7 @@ class LLMModuloAgent(BaseAgent):
         train_info_str = train_info.to_csv(sep='\t', na_rep='nan', index=False)
         flight_info_str = flight_info.to_csv(sep='\t', na_rep='nan', index=False)
         time_before = time.time()
-        query_message=[{"role": "user", "content": TRANSPORT_BACK_SELECTION_INSTRUCTION.format(required_options=required_num, user_requirements=query["nature_language"], train_info=train_info_str, flight_info=flight_info_str)}]
+        query_message=[{"role": "user", "content": TRANSPORT_BACK_SELECTION_INSTRUCTION.format(origin=query["target_city"], destination=query["source_city"], required_options=required_num, user_requirements=query["nature_language"], train_info=train_info_str, flight_info=flight_info_str)}]
         answer = self.backbone_llm(query_message,one_line=False)
         print(answer)
         selected_train_idx, selected_flight_idx = [], []
