@@ -749,7 +749,7 @@ def collect_time_error(symbolic_input, plan_json, verbose=False):
                 transport_ed_time = activity_i["transports"]["end_time"]
             
                 if time2real(activity_st_time) < time2real(transport_ed_time):
-
+                    
                     error_info.append(f"Must arrive at the location, {activity_i['position']} in day {day_i+1}, before starting the activity at {activity_st_time}.")
 
             
@@ -792,18 +792,22 @@ def collect_space_error(symbolic_input, plan_json, verbose=False):
     for day_i, day_plan_i in enumerate(plan):
         for activity_i in day_plan_i["activities"]:
             
-            if not "position" in activity_i:
-                if "start" in activity_i:
-                    current_position = activity_i["start"]
-                else:
-                    # table_statistics.loc[0] = [1]
-                    error_info.append("Every activity need a position key: ".format(activity_i))
-                    continue
+            if "position" not in activity_i:
+
+                try:
+                    if activity_i["type"] in ["airplane", "train"]:
+                        current_position = activity_i["start"]
+                    else:
+                        raise Exception("All activities except intercity transport activities need to provide position information.")
+                
+                except:
+                    error_info.append("All activities except intercity transport activities need to provide position information.")
+                    return err_info
 
             else:
                 current_position = activity_i['position']
                 
-            if not "transports" in activity_i:
+            if "transports" not in activity_i:
                 # print(activity_i)
                 # table_statistics.loc[0] = [1]
                 # error_info.append("Need trasnports: ".format(activity_i))
@@ -843,7 +847,12 @@ def collect_space_error(symbolic_input, plan_json, verbose=False):
             if "position" in activity_i:
                 position_list.append(activity_i['position'])
             else:
-                position_list.append(activity_i["end"])
+                try:
+                    if activity_i["type"] in ["airplane", "train"]:
+                        position_list.append(activity_i["end"])
+                except:
+                    error_info.append("All activities except intercity transport activities need to provide position information.")
+                    return error_info
         
         if day_i < len(plan) - 1 and day_plan_i["activities"][-1]['type'] != 'accommodation':
             error_info.append(f"The type of the last activity on day {day_i+1} should be accommodation. Except for the last day of the trip, the last activity at night on other days should be returning to the hotel in the plan. ")
