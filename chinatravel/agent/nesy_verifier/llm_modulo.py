@@ -151,6 +151,11 @@ class LLMModuloAgent(BaseAgent):
     
 
         self.problem = problem
+
+        self.backbone_llm.input_token_count = 0
+        self.backbone_llm.output_token_count = 0
+
+
         self.llm_inference_time = 0
         self.information_collection_time = 0
         self.memory = {}
@@ -317,6 +322,8 @@ class LLMModuloAgent(BaseAgent):
             "itinerary": json_plan, 
             
             "elapsed_time(sec)": time.time() - self.start_clock, 
+            "input_token_count": self.backbone_llm.input_token_count,
+            "output_token_count": self.backbone_llm.output_token_count,
             "llm_inference_time(sec)": self.llm_inference_time, 
             "information_collection_time": self.information_collection_time, 
         }
@@ -349,8 +356,9 @@ class LLMModuloAgent(BaseAgent):
         with open(json_file, 'w', encoding='utf-8') as f:
             json.dump(evaluated_plan, f, indent=4, ensure_ascii=False)
 
+        unique_error_info = list(set(error_info))
         error_info_nl = ""
-        for item in error_info:
+        for item in unique_error_info:
             error_info_nl += item + "\n"
         
         error_file = os.path.join(self.log_dir, f'problem_{prob_idx}_step_0_error.err')
@@ -390,6 +398,7 @@ class LLMModuloAgent(BaseAgent):
             response = """[{"day": 1,""" + response
             
             self.llm_inference_time += time.time() - pre_time
+
             nl_plan = repair_json(response)
             json_plan = json.loads(nl_plan)
 
@@ -402,6 +411,8 @@ class LLMModuloAgent(BaseAgent):
                 "itinerary": json_plan, 
                 
                 "elapsed_time(sec)": time.time() - self.start_clock, 
+                "input_token_count": self.backbone_llm.input_token_count,
+                "output_token_count": self.backbone_llm.output_token_count,
                 "llm_inference_time(sec)": self.llm_inference_time, 
                 "information_collection_time": self.information_collection_time, 
             }

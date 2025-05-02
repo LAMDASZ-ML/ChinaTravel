@@ -802,7 +802,7 @@ def collect_space_error(symbolic_input, plan_json, verbose=False):
                 
                 except:
                     error_info.append("All activities except intercity transport activities need to provide position information.")
-                    return err_info
+                    return error_info
 
             else:
                 current_position = activity_i['position']

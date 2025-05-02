@@ -31,6 +31,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--skip", "-sk", type=int, default=0, help="skip if the plan exists"
     )
+    parser.add_argument('--restart_from', type=str, default=None, help='Restart Data ID')
     parser.add_argument(
         "--agent",
         "-a",
@@ -48,6 +49,7 @@ if __name__ == "__main__":
     parser.add_argument('--oracle_translation', action='store_true', help='Set this flag to enable oracle translation.')
     parser.add_argument('--preference_search', action='store_true', help='Set this flag to enable preference search.')
     parser.add_argument('--refine_steps', type=int, default=10, help='Steps for refine-based method, such as LLM-modulo, Reflection')
+    
 
     args = parser.parse_args()
 
@@ -100,6 +102,9 @@ if __name__ == "__main__":
     succ_count, eval_count = 0, 0
 
     for i, data_idx in enumerate(query_index):
+        if args.restart_from is not None and data_idx != args.restart_from:
+            args.restart_from = None
+            continue
 
         sys.stdout = sys.__stdout__
         print("------------------------------")

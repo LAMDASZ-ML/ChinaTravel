@@ -37,6 +37,8 @@ class AbstractLLM(ABC):
         pass
 
     def __init__(self):
+        self.input_token_count = 0
+        self.output_token_count = 0
         pass
 
     def __call__(self, messages, one_line=True, json_mode=False):
@@ -188,8 +190,12 @@ class Qwen(AbstractLLM):
             )
         self.name = model_name
 
+        
+
     def _get_response(self, messages, one_line, json_mode):
         # print(messages)
+        
+        
 
         if "Qwen3" in self.name:
             text = self.tokenizer.apply_chat_template(
@@ -198,6 +204,12 @@ class Qwen(AbstractLLM):
                 add_generation_prompt=True,
                 enable_thinking=True # Switch between thinking and non-thinking modes. Default is True.
             )
+
+            input_tokens = self.tokenizer(text)["input_ids"]
+            self.input_token_count += len(input_tokens)
+            
+            if len(input_tokens) >= 65536:
+                return '{"error": "Input prompt is longer than 65536 tokens."}'
             # conduct text completion
             outputs = self.llm.generate([text], self.sampling_params)
 
@@ -205,6 +217,10 @@ class Qwen(AbstractLLM):
             generated_text = outputs[0].outputs[0].text
             # print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
             # print(generated_text)
+
+            output_token_ids = outputs[0].outputs[0].token_ids
+            self.output_token_count += len(output_token_ids)
+
             try:
                 m = re.match(r"<think>\n(.+)</think>\n\n", generated_text, flags=re.DOTALL)
                 content = generated_text[len(m.group(0)):]
@@ -213,12 +229,25 @@ class Qwen(AbstractLLM):
             except Exception as e:
                 thinking_content = ""
                 content = generated_text.strip()
+            
+            # print("think content: ", thinking_content)
+            # print("content: ", content)
             res_str = content
         else:
             text = self.tokenizer.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True
             )
+            
+            input_tokens = self.tokenizer(text)["input_ids"]
+            self.input_token_count += len(input_tokens)
+            
+            if len(input_tokens) >= 65536:
+                return '{"error": "Input prompt is longer than 65536 tokens."}'
+
             res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
+            
+            output_token_ids = outputs[0].outputs[0].token_ids
+            self.output_token_count += len(output_token_ids)
         try:
             if json_mode:
                 res_str = repair_json(res_str, ensure_ascii=False)
