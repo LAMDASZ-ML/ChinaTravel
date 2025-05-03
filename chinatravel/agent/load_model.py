@@ -77,8 +77,8 @@ def init_llm(llm_name):
         llm = Qwen(llm_name)
     elif llm_name == "mistral":
         llm = Mistral()
-    elif llm_name == "llama":
-        llm = Llama()
+    elif "Llama" in llm_name:
+        llm = Llama(llm_name)
     else:
         raise Exception("Not Implemented")
 

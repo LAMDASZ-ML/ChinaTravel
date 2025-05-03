@@ -59,14 +59,27 @@ class Deepseek(AbstractLLM):
         self.llm = OpenAI(
             base_url="https://api.deepseek.com",
         )
+        self.path = os.path.join(
+            project_root_path, "chinatravel", "local_llm", "deepseek_v3_tokenizer"
+        )
         self.name = "DeepSeek-V3"
 
+        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+
     def _send_request(self, messages, kwargs):
+
+        text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        input_tokens = self.tokenizer(text)["input_ids"]
+
+        self.input_token_count += len(input_tokens)
         res_str = (
             self.llm.chat.completions.create(messages=messages, **kwargs)
             .choices[0]
             .message.content
         )
+        output_tokens = self.tokenizer(res_str)["input_ids"]
+        self.output_token_count += len(output_tokens)
+        
         res_str = res_str.strip()
         return res_str
 
@@ -244,8 +257,9 @@ class Qwen(AbstractLLM):
             if len(input_tokens) >= 65536:
                 return '{"error": "Input prompt is longer than 65536 tokens."}'
 
-            res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
-            
+            outputs = self.llm.generate([text], self.sampling_params)
+            res_str = outputs[0].outputs[0].text
+
             output_token_ids = outputs[0].outputs[0].token_ids
             self.output_token_count += len(output_token_ids)
         try:
@@ -300,23 +314,50 @@ class Mistral(AbstractLLM):
 
 
 class Llama(AbstractLLM):
-    def __init__(self):
+    def __init__(self, model_name):
         super().__init__()
-        self.path = "/lamda/shaojj/codes/TravelPlanner-main/dev/model/llama-3-chinese-8b-instruct-v3"
+
+
+        Llama_supported = ["Llama3-3B", "Llama3-8B"]
+        if model_name not in Llama_supported:
+            raise ValueError(f"Unsupported model name: {model_name}. Supported models: {Llama_supported}")
+        
+        if model_name == "Llama3-3B":
+            self.path = os.path.join(
+            project_root_path, "chinatravel", "local_llm", "Llama-3.2-3B-Instruct"
+            )
+        elif model_name == "Llama3-8B":
+            self.path = os.path.join(
+            project_root_path, "chinatravel", "local_llm", "Meta-Llama-3.1-8B-Instruct"
+            )
+        
         self.tokenizer = AutoTokenizer.from_pretrained(self.path)
         self.sampling_params = SamplingParams(
             temperature=0, top_p=0.001, max_tokens=4096
         )
         self.llm = LLM(model=self.path)
-        self.name = "Llama"
+        self.name = model_name
 
     def _get_response(self, messages, one_line, json_mode):
         # print(messages)
         text = self.tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
         )
+    
+        input_tokens = self.tokenizer(text)["input_ids"]
+        self.input_token_count += len(input_tokens)
+        
+        if len(input_tokens) >= 131072:
+            return '{"error": "Input prompt is longer than 131072 tokens."}'
+        
+        
         try:
-            res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
+            outputs = self.llm.generate([text], self.sampling_params)
+            res_str = outputs[0].outputs[0].text
+            
+            output_token_ids = outputs[0].outputs[0].token_ids
+            self.output_token_count += len(output_token_ids)
+
             if json_mode:
                 res_str = repair_json(res_str, ensure_ascii=False)
             elif one_line:

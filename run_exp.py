@@ -102,9 +102,10 @@ if __name__ == "__main__":
     succ_count, eval_count = 0, 0
 
     for i, data_idx in enumerate(query_index):
-        if args.restart_from is not None and data_idx != args.restart_from:
-            args.restart_from = None
+        if (args.restart_from is not None) and (data_idx != args.restart_from):
             continue
+        else:
+            args.restart_from = None
 
         sys.stdout = sys.__stdout__
         print("------------------------------")

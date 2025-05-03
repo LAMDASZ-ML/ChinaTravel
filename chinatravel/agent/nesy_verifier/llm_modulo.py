@@ -114,6 +114,9 @@ class LLMModuloAgent(BaseAgent):
         if info == "No solution":
             return info
 
+        if not isinstance(info, list):
+            return "No solution"
+        
         if len(info) == 3:
             info[1]["price"] = info[1]["cost"]
             info[1]["tickets"] = self.problem["people_number"]
