@@ -331,7 +331,7 @@ class Llama(AbstractLLM):
             project_root_path, "chinatravel", "local_llm", "Meta-Llama-3.1-8B-Instruct"
             )
         
-        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.path, local_files_only=True)
         self.sampling_params = SamplingParams(
             temperature=0, top_p=0.001, max_tokens=4096
         )
