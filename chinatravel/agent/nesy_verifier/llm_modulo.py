@@ -157,6 +157,8 @@ class LLMModuloAgent(BaseAgent):
 
         self.backbone_llm.input_token_count = 0
         self.backbone_llm.output_token_count = 0
+        
+        self.backbone_llm.input_token_maxx = 0
 
 
         self.llm_inference_time = 0
@@ -327,6 +329,7 @@ class LLMModuloAgent(BaseAgent):
             "elapsed_time(sec)": time.time() - self.start_clock, 
             "input_token_count": self.backbone_llm.input_token_count,
             "output_token_count": self.backbone_llm.output_token_count,
+            "input_token_maxx": self.backbone_llm.input_token_maxx,
             "llm_inference_time(sec)": self.llm_inference_time, 
             "information_collection_time": self.information_collection_time, 
         }
@@ -416,6 +419,7 @@ class LLMModuloAgent(BaseAgent):
                 "elapsed_time(sec)": time.time() - self.start_clock, 
                 "input_token_count": self.backbone_llm.input_token_count,
                 "output_token_count": self.backbone_llm.output_token_count,
+                "input_token_maxx": self.backbone_llm.input_token_maxx,
                 "llm_inference_time(sec)": self.llm_inference_time, 
                 "information_collection_time": self.information_collection_time, 
             }

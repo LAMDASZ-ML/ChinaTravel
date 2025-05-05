@@ -88,7 +88,7 @@ if __name__ == "__main__":
     kwargs = {
         "method": args.agent,
         "env": WorldEnv(),
-        "backbone_llm": init_llm(args.llm),
+        "backbone_llm": init_llm(args.llm, extend65536=(args.agent in ["LLM-modulo"])),
         "cache_dir": cache_dir,
         "log_dir": log_dir, 
         "debug": True,

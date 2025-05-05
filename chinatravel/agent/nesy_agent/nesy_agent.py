@@ -170,6 +170,7 @@ class NesyAgent(BaseAgent):
 
         plan_out["input_token_count"] = self.backbone_llm.input_token_count
         plan_out["output_token_count"] = self.backbone_llm.output_token_count
+        plan_out["input_token_maxx"] = self.backbone_llm.input_token_maxx
 
         plan_out["llm_rec_count"] = self.llm_rec_count
         plan_out["llm_rec_format_error_count"] = self.llm_rec_format_error
@@ -1518,6 +1519,7 @@ class NesyAgent(BaseAgent):
 
         self.backbone_llm.input_token_count = 0
         self.backbone_llm.output_token_count = 0
+        self.backbone_llm.input_token_maxx = 0
 
         self.llm_rec_format_error = 0
         self.llm_rec_count = 0

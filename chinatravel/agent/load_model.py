@@ -60,7 +60,7 @@ def init_agent(kwargs):
     return agent
 
 
-def init_llm(llm_name):
+def init_llm(llm_name, extend65536=False):
     from .llms import Deepseek, GPT4o, GLM4Plus, Qwen, Mistral, Llama
 
     if llm_name == "deepseek":
@@ -70,9 +70,9 @@ def init_llm(llm_name):
     elif llm_name == "glm4-plus":
         llm = GLM4Plus()
     elif "Qwen" in llm_name:
-        llm = Qwen(llm_name)
+        llm = Qwen(llm_name, extend65536=extend65536)
     elif llm_name == "mistral":
-        llm = Mistral()
+        llm = Mistral(extend65536=extend65536)
     elif "Llama" in llm_name:
         llm = Llama(llm_name)
     else:
