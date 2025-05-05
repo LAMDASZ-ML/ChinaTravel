@@ -168,18 +168,18 @@ class NesyAgent(BaseAgent):
                 plan_out["time_out_flag"] = True
 
 
-            plan_out["input_token_count"] = self.backbone_llm.input_token_count
-            plan_out["output_token_count"] = self.backbone_llm.output_token_count
+        plan_out["input_token_count"] = self.backbone_llm.input_token_count
+        plan_out["output_token_count"] = self.backbone_llm.output_token_count
 
-            plan_out["llm_rec_count"] = self.llm_rec_count
-            plan_out["llm_rec_format_error_count"] = self.llm_rec_format_error
+        plan_out["llm_rec_count"] = self.llm_rec_count
+        plan_out["llm_rec_format_error_count"] = self.llm_rec_format_error
 
-            plan_out["search_nodes"] = self.search_nodes
-            plan_out["backtrack_count"] = self.backtrack_count
-            plan_out["constraints_validation_count"] = self.constraints_validation_count
-            plan_out["commonsense_pass_count"] = self.commonsense_pass_count
-            plan_out["logical_pass_count"] = self.logical_pass_count
-            plan_out["all_constraints_pass"] = self.all_constraints_pass
+        plan_out["search_nodes"] = self.search_nodes
+        plan_out["backtrack_count"] = self.backtrack_count
+        plan_out["constraints_validation_count"] = self.constraints_validation_count
+        plan_out["commonsense_pass_count"] = self.commonsense_pass_count
+        plan_out["logical_pass_count"] = self.logical_pass_count
+        plan_out["all_constraints_pass"] = self.all_constraints_pass
         return succ, plan_out
 
     def constraints_validation(self, query, plan, poi_plan):
@@ -479,6 +479,8 @@ class NesyAgent(BaseAgent):
             transports_ranking = self.innercity_transports_ranking_from_query
 
             for transport_type_sel in transports_ranking:
+                
+                self.search_nodes += 1
 
                 flag = True
                 if "back_transport" in poi_plan:
@@ -517,7 +519,7 @@ class NesyAgent(BaseAgent):
                 transports_ranking = self.innercity_transports_ranking_from_query
 
                 for transport_type_sel in transports_ranking:
-
+                    self.search_nodes += 1
                     flag = True
                     if "back_transport" in poi_plan:
                         transports_sel = self.collect_innercity_transport(
@@ -745,7 +747,7 @@ class NesyAgent(BaseAgent):
 
         for idx in range(len(rest_info)):
             poi_sel = rest_info.iloc[idx]
-
+            self.search_nodes += 1
             if current_position == poi_sel["name"]:
                 transports_sel = []
                 arrived_time = current_time
@@ -828,7 +830,7 @@ class NesyAgent(BaseAgent):
 
         for idx in range(len(attr_info)):
             poi_sel = attr_info.iloc[idx]
-
+            self.search_nodes += 1
             if poi_sel["name"] == current_position:
                 transports_sel = []
                 arrived_time = current_time
@@ -944,6 +946,7 @@ class NesyAgent(BaseAgent):
             if len(plan) < current_day + 1:
                 plan.append({"day": current_day + 1, "activities": []})
 
+            self.search_nodes += 1
             plan = self.select_and_add_breakfast(
                 plan, poi_plan, current_day, current_time, current_position
             )
@@ -1014,7 +1017,7 @@ class NesyAgent(BaseAgent):
                 # transports_ranking = self.ranking_innercity_transport(current_position, poi_plan["back_transport"]["From"], current_day, current_time)
                 transports_ranking = self.innercity_transports_ranking_from_query
                 for trans_type_sel in transports_ranking:
-
+                    self.search_nodes += 1
                     transports_sel = self.collect_innercity_transport(
                         query["target_city"],
                         current_position,
@@ -1056,7 +1059,7 @@ class NesyAgent(BaseAgent):
                 transports_ranking = self.innercity_transports_ranking_from_query
                 
                 for trans_type_sel in transports_ranking:
-
+                    self.search_nodes += 1
                     if hotel_sel["name"] == current_position:
                         transports_sel = []
                         arrived_time = current_time
@@ -1149,7 +1152,7 @@ class NesyAgent(BaseAgent):
                             )
 
                             for trans_type_sel in transports_ranking:
-
+                                self.search_nodes += 1
                                 transports_sel = self.collect_innercity_transport(
                                     query["target_city"],
                                     current_position,
@@ -1234,7 +1237,7 @@ class NesyAgent(BaseAgent):
                                 )
                             )
                             break
-
+                        self.search_nodes += 1
                         attr_idx = r_i
                         if not (attr_idx in self.attractions_visiting):
 
@@ -1251,6 +1254,7 @@ class NesyAgent(BaseAgent):
                                 self.innercity_transports_ranking_from_query
                             )
                             for trans_type_sel in transports_ranking:
+                                self.search_nodes += 1
                                 transports_sel = self.collect_innercity_transport(
                                     query["target_city"],
                                     current_position,
@@ -1351,10 +1355,11 @@ class NesyAgent(BaseAgent):
 
                     if len(plan) < current_day + 1:
                         plan.append({"day": current_day + 1, "activities": []})
-
+                    self.search_nodes += 1
                     # transports_ranking = self.ranking_innercity_transport(current_position, poi_plan["back_transport"]["From"], current_day, current_time)
                     transports_ranking = self.innercity_transports_ranking_from_query
                     for trans_type_sel in transports_ranking:
+                        self.search_nodes += 1
                         transports_sel = self.collect_innercity_transport(
                             query["target_city"],
                             current_position,
@@ -1393,11 +1398,11 @@ class NesyAgent(BaseAgent):
                 elif self.query["days"] > 1:
                     # go to hotel
                     hotel_sel = poi_plan["accommodation"]
-
+                    self.search_nodes += 1
                     # transports_ranking = self.ranking_innercity_transport(current_position, hotel_sel["name"], current_day, current_time)
                     transports_ranking = self.innercity_transports_ranking_from_query
                     for trans_type_sel in transports_ranking:
-
+                        self.search_nodes += 1
                         transports_sel = self.collect_innercity_transport(
                             query["target_city"],
                             current_position,
