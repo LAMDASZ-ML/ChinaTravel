@@ -335,7 +335,7 @@ class Llama(AbstractLLM):
         self.sampling_params = SamplingParams(
             temperature=0, top_p=0.001, max_tokens=4096
         )
-        self.llm = LLM(model=self.path)
+        self.llm = LLM(model=self.path, local_files_only=True)
         self.name = model_name
 
     def _get_response(self, messages, one_line, json_mode):

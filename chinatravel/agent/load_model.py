@@ -21,10 +21,7 @@ def init_agent(kwargs):
         )
     elif kwargs["method"] == "LLMNeSy":
         agent = LLMDrivenAgent(
-            env=kwargs["env"],
-            backbone_llm=kwargs["backbone_llm"],
-            cache_dir=kwargs["cache_dir"],
-            debug=kwargs["debug"],
+            **kwargs
         )
     elif kwargs["method"] == "Act":
         agent = ActAgent(
@@ -53,7 +50,6 @@ def init_agent(kwargs):
             ),
         )
     elif kwargs["method"] == "LLM-modulo":
-
         kwargs["model"] = kwargs["backbone_llm"]
         kwargs["max_steps"] = kwargs["refine_steps"]
         agent = LLMModuloAgent(

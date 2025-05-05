@@ -15,7 +15,7 @@ if project_root_path not in sys.path:
     sys.path.insert(0, project_root_path)
 
 
-from agent.base import AbstractAgent
+from agent.base import AbstractAgent, BaseAgent
 from agent.nesy_agent.utils import (
     time_compare_if_earlier_equal,
     calc_cost_from_itinerary_wo_intercity,
@@ -41,42 +41,45 @@ from chinatravel.agent.nesy_agent.nl2sl_hybrid import nl2sl_reflect
 from copy import deepcopy
 
 
-class NesyAgent(AbstractAgent):
-    def __init__(
-        self,
-        env,
-        backbone_llm,
-        method="NeSy",
-        cache_dir="cache/",
-        max_time=None,
-        debug=True,
-        search_width=None,
-    ):
+class NesyAgent(BaseAgent):
+    # def __init__(
+    #     self,
+    #     env,
+    #     backbone_llm,
+    #     method="NeSy",
+    #     cache_dir="cache/",
+    #     max_time=None,
+    #     debug=True,
+    #     search_width=None,
+    # ):
 
-        super().__init__(env)
+    def __init__(self, **kwargs):
+        super().__init__(name="LLM-Modulo", **kwargs)
 
-        self.backbone_llm = backbone_llm
-        self.debug = debug
+        self.max_steps = kwargs.get('max_steps', 0)
+
+        self.debug = kwargs.get("debug", False)
 
         self.memory = {}
 
         self.TIME_CUT = 60 * 5
 
+        cache_dir = kwargs.get("cache_dir", "cache/")
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
         self.cache_dir = cache_dir
 
         self.least_plan_schema, self.least_plan_comm = None, None
-        self.method = method
+        self.method = kwargs["method"]
 
         print("cache dir:", self.cache_dir)
         if not os.path.exists(
-            os.path.join(self.cache_dir, self.method + "_" + backbone_llm.name)
+            os.path.join(self.cache_dir, self.method + "_" + self.backbone_llm.name)
         ):
             os.makedirs(
-                os.path.join(self.cache_dir, self.method + "_" + backbone_llm.name)
+                os.path.join(self.cache_dir, self.method + "_" + self.backbone_llm.name)
             )
-        self.search_width = search_width
+        self.search_width = kwargs.get("search_width", None)
 
         self.preference_search = False
 
@@ -109,16 +112,25 @@ class NesyAgent(AbstractAgent):
     def run(self, query, load_cache=False, oralce_translation=False, preference_search=False):
 
         self.preference_search = preference_search
+        method_name = self.method + "_" + self.backbone_llm.name
+        if oralce_translation:
+            method_name = method_name + "_oracletranslation"
+        if preference_search:
+            method_name = method_name + "_preferencesearch"
+        self.log_dir = os.path.join(self.cache_dir, method_name)
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
+
         sys.stdout = Logger(
-            "{}/{}/{}.log".format(
-                self.cache_dir, self.method + "_" + self.backbone_llm.name, query["uid"]
+            "{}/{}.log".format(
+                self.log_dir, query["uid"]
             ),
             sys.stdout,
             self.debug,
         )
         sys.stderr = Logger(
-            "{}/{}/{}.error".format(
-                self.cache_dir, self.method + "_" + self.backbone_llm.name, query["uid"]
+            "{}/{}.error".format(
+                self.log_dir, query["uid"]
             ),
             sys.stderr,
             self.debug,
@@ -149,13 +161,30 @@ class NesyAgent(AbstractAgent):
                 plan_out = self.least_plan_schema
             else:
                 plan_out = {}
+
             plan_out["search_time_sec"] = time.time() - self.time_before_search
             plan_out["llm_inference_time_sec"] = self.llm_inference_time_count
             if plan_out["search_time_sec"] > self.TIME_CUT:
                 plan_out["time_out_flag"] = True
+
+
+            plan_out["input_token_count"] = self.backbone_llm.input_token_count
+            plan_out["output_token_count"] = self.backbone_llm.output_token_count
+
+            plan_out["llm_rec_count"] = self.llm_rec_count
+            plan_out["llm_rec_format_error_count"] = self.llm_rec_format_error
+
+            plan_out["search_nodes"] = self.search_nodes
+            plan_out["backtrack_count"] = self.backtrack_count
+            plan_out["constraints_validation_count"] = self.constraints_validation_count
+            plan_out["commonsense_pass_count"] = self.commonsense_pass_count
+            plan_out["logical_pass_count"] = self.logical_pass_count
+            plan_out["all_constraints_pass"] = self.all_constraints_pass
         return succ, plan_out
 
     def constraints_validation(self, query, plan, poi_plan):
+
+        self.constraints_validation_count += 1
 
         res_plan = {
             "people_number": query["people_number"],
@@ -172,6 +201,9 @@ class NesyAgent(AbstractAgent):
 
         # if not bool_result:
         #     exit(0)
+
+        if bool_result:
+            self.commonsense_pass_count += 1
 
         try:
             extracted_vars = get_symbolic_concepts(query, res_plan, need_ood=False)
@@ -200,10 +232,14 @@ class NesyAgent(AbstractAgent):
         # if logical_result:
         #     print("Logical passed!")
 
+        if logical_pass:
+            self.logical_pass_count += 1
+
         bool_result = bool_result and logical_pass
 
         if bool_result:
             print("\n Pass! \n")
+            self.all_constraints_pass += 1
 
             if self.least_plan_logic is None:
                 self.least_plan_logic = res_plan
@@ -453,6 +489,10 @@ class NesyAgent(AbstractAgent):
                         current_time,
                         transport_type_sel,
                     )
+                    if not isinstance(transports_sel, list):
+                        self.backtrack_count += 1
+                        print("inner-city transport error, backtrack...")
+                        continue
 
                     if len(transports_sel) > 0:
                         arrived_time = transports_sel[-1]["end_time"]
@@ -487,6 +527,10 @@ class NesyAgent(AbstractAgent):
                             current_time,
                             transport_type_sel,
                         )
+                        if not isinstance(transports_sel, list):
+                            self.backtrack_count += 1
+                            print("inner-city transport error, backtrack...")
+                            continue
 
                         flag = True
                         # print(transports_sel)
@@ -714,6 +758,11 @@ class NesyAgent(AbstractAgent):
                     current_time,
                     "taxi",
                 )
+                if not isinstance(transports_sel, list):
+                    self.backtrack_count += 1
+                    print("inner-city transport error, backtrack...")
+                    continue
+
                 arrived_time = transports_sel[-1]["end_time"]
 
             try:
@@ -791,6 +840,11 @@ class NesyAgent(AbstractAgent):
                     current_time,
                     "taxi",
                 )
+                if not isinstance(transports_sel, list):
+                    self.backtrack_count += 1
+                    print("inner-city transport error, backtrack...")
+                    continue
+
                 arrived_time = transports_sel[-1]["end_time"]
 
             try:
@@ -831,6 +885,7 @@ class NesyAgent(AbstractAgent):
         self, query, poi_plan, plan, current_time, current_position, current_day=0
     ):
 
+        self.search_nodes += 1
         if (
             time.time() - self.time_before_search
             > self.TIME_CUT + self.llm_inference_time_count
@@ -841,6 +896,8 @@ class NesyAgent(AbstractAgent):
         if self.check_if_too_late(
             query, current_day, current_time, current_position, poi_plan
         ):
+            self.backtrack_count += 1
+            print("The current time is too late to go hotel or back-transport, backtrack...")
             return False, plan
 
         if self.required_budget != None:
@@ -856,7 +913,8 @@ class NesyAgent(AbstractAgent):
                         total_cost += activity["cost"]
 
             if total_cost + self.intercity_with_hotel_cost > self.required_budget:
-                print("budget exceeded")
+                self.backtrack_count += 1
+                print("budget exceeded, backtrack...")
                 return False, plan
 
         # intercity_transport - go
@@ -876,7 +934,8 @@ class NesyAgent(AbstractAgent):
             if success:
                 return True, plan
             else:
-                print("No solution for the given Go Transport")
+                self.backtrack_count += 1
+                print("No solution for the given Go Transport, backtrack...")
                 return False, plan
 
         # breakfast
@@ -896,12 +955,17 @@ class NesyAgent(AbstractAgent):
             )
             if success:
                 return True, plan
+            
             plan[current_day]["activities"].pop()
 
             candidates_type = []
             if current_day == query["days"] - 1 and current_time != "":
                 candidates_type.append("back-intercity-transport")
             else:
+
+                self.backtrack_count += 1
+                print("No solution for the given Breakfast, backtrack...")
+
                 return False, plan
 
         else:
@@ -926,8 +990,6 @@ class NesyAgent(AbstractAgent):
         print("candidates_type: ", candidates_type)
 
         while len(candidates_type) > 0:
-
-            # print("info before search poi type", current_day, current_time, current_position, poi_plan, plan)
 
             poi_type, candidates_type = self.select_next_poi_type(
                 candidates_type,
@@ -960,6 +1022,10 @@ class NesyAgent(AbstractAgent):
                         current_time,
                         trans_type_sel,
                     )
+                    if not isinstance(transports_sel, list):
+                        self.backtrack_count += 1
+                        print("inner-city transport error, backtrack...")
+                        continue
 
                     plan[current_day]["activities"] = self.add_intercity_transport(
                         plan[current_day]["activities"],
@@ -976,9 +1042,10 @@ class NesyAgent(AbstractAgent):
                         return True, res_plan
                     else:
                         plan[current_day]["activities"].pop()
+                        self.backtrack_count += 1
 
                         print(
-                            "[We have to go back transport], but constraints_validation failed..."
+                            "Back-transport, but constraints_validation failed, backtrack..."
                         )
                         return False, plan
             elif poi_type == "hotel":
@@ -1001,6 +1068,10 @@ class NesyAgent(AbstractAgent):
                             current_time,
                             trans_type_sel,
                         )
+                        if not isinstance(transports_sel, list):
+                            self.backtrack_count += 1
+                            print("inner-city transport error, backtrack...")
+                            continue
 
                         arrived_time = transports_sel[-1]["end_time"]
 
@@ -1022,6 +1093,9 @@ class NesyAgent(AbstractAgent):
 
                     if success:
                         return True, plan
+
+                    self.backtrack_count += 1
+                    print("Fail with the given accommodation activity, backtrack...")
 
                     plan[current_day]["activities"].pop()
             elif poi_type in ["lunch", "dinner", "attraction"]:
@@ -1065,7 +1139,7 @@ class NesyAgent(AbstractAgent):
                             if res_idx < 0 or res_idx >= len(
                                 self.memory["restaurants"]
                             ):
-                                print(res_idx, len(self.memory["restaurants"]))
+                                print("index error: ", res_idx, len(self.memory["restaurants"]))
 
                             poi_sel = self.memory["restaurants"].iloc[res_idx]
 
@@ -1083,6 +1157,11 @@ class NesyAgent(AbstractAgent):
                                     current_time,
                                     trans_type_sel,
                                 )
+                                if not isinstance(transports_sel, list):
+                                    self.backtrack_count += 1
+                                    print("inner-city transport error, backtrack...")
+                                    continue
+
                                 arrived_time = transports_sel[-1]["end_time"]
 
                                 try:
@@ -1095,6 +1174,8 @@ class NesyAgent(AbstractAgent):
                                         transports_sel,
                                     )
                                 except:
+                                    self.backtrack_count += 1
+                                    print("add_restaurant failed, backtrack...")
                                     continue
 
                                 new_time = plan[current_day]["activities"][-1][
@@ -1113,6 +1194,9 @@ class NesyAgent(AbstractAgent):
                                 )
                                 if success:
                                     return True, plan
+
+                                self.backtrack_count += 1
+                                print("add_restaurant failed, backtrack...")
 
                                 plan[current_day]["activities"].pop()
                                 self.restaurants_visiting.pop()
@@ -1174,6 +1258,11 @@ class NesyAgent(AbstractAgent):
                                     current_time,
                                     trans_type_sel,
                                 )
+                                if not isinstance(transports_sel, list):
+                                    self.backtrack_count += 1
+                                    print("inner-city transport error, backtrack...")
+                                    continue
+
                                 arrived_time = transports_sel[-1]["end_time"]
                                 opentime, endtime = (
                                     poi_sel["opentime"],
@@ -1181,10 +1270,14 @@ class NesyAgent(AbstractAgent):
                                 )
                                 # too late
                                 if time_compare_if_earlier_equal("21:00", arrived_time):
+                                    self.backtrack_count += 1
+                                    print("The current time is too late...")
                                     continue
 
                                 # it is closed ...
                                 if time_compare_if_earlier_equal(endtime, arrived_time):
+                                    self.backtrack_count += 1
+                                    print("The attraction is closed now...")
                                     continue
 
                                 if time_compare_if_earlier_equal(
@@ -1242,6 +1335,9 @@ class NesyAgent(AbstractAgent):
                                 if success:
                                     return True, plan
 
+                                self.backtrack_count += 1
+                                print("add_attraction failed, backtrack...")
+
                                 plan[current_day]["activities"].pop()
                                 self.attractions_visiting.pop()
                                 self.spot_type_visiting.pop()
@@ -1266,6 +1362,10 @@ class NesyAgent(AbstractAgent):
                             current_time,
                             trans_type_sel,
                         )
+                        if not isinstance(transports_sel, list):
+                            self.backtrack_count += 1
+                            print("inner-city transport error, backtrack...")
+                            continue
 
                         plan[current_day]["activities"] = self.add_intercity_transport(
                             plan[current_day]["activities"],
@@ -1282,9 +1382,11 @@ class NesyAgent(AbstractAgent):
                             return True, res_plan
                         else:
                             plan[current_day]["activities"].pop()
+                            
+                            self.backtrack_count += 1
 
                             print(
-                                "[Try the go back transport], but constraints_validation failed..."
+                                "Back-transport, but constraints_validation failed, backtrack..."
                             )
                             # return False, plan
 
@@ -1303,6 +1405,10 @@ class NesyAgent(AbstractAgent):
                             current_time,
                             trans_type_sel,
                         )
+                        if not isinstance(transports_sel, list):
+                            self.backtrack_count += 1
+                            print("inner-city transport error, backtrack...")
+                            continue
 
                         arrived_time = transports_sel[-1]["end_time"]
 
@@ -1330,7 +1436,8 @@ class NesyAgent(AbstractAgent):
                         if success:
                             return True, plan
                         else:
-                            print("Try the go back hotel, failed...")
+                            self.backtrack_count += 1
+                            print("Try the go back hotel, failed, backtrack...")
 
                             plan[current_day]["activities"].pop()
 
@@ -1341,11 +1448,12 @@ class NesyAgent(AbstractAgent):
                 continue
 
             candidates_type.remove(poi_type)
-            print("try another poi type")
+            print("try another poi type, backtrack...")
 
         return False, plan
 
     def generate_plan_with_search(self, query):
+
         source_city = query["start_city"]
         target_city = query["target_city"]
 
@@ -1392,10 +1500,8 @@ class NesyAgent(AbstractAgent):
         self.time_before_search = time.time()
         self.llm_inference_time_count = 0
 
-        # reset cache before searching
+        # reset the cache before searching
         poi_plan = {}
-        # poi_plan["transport_preference"] = query["transport_preference"]
-
         self.restaurants_visiting = []
         self.attractions_visiting = []
         self.food_type_visiting = []
@@ -1404,6 +1510,19 @@ class NesyAgent(AbstractAgent):
         self.restaurant_names_visiting = []
         self.ranking_attractions_flag = False
         self.ranking_restaurants_flag = False
+
+        self.backbone_llm.input_token_count = 0
+        self.backbone_llm.output_token_count = 0
+
+        self.llm_rec_format_error = 0
+        self.llm_rec_count = 0
+        self.search_nodes = 0
+        self.backtrack_count = 0
+
+        self.constraints_validation_count = 0 
+        self.commonsense_pass_count = 0
+        self.logical_pass_count = 0
+        self.all_constraints_pass = 0
 
         self.least_plan_schema, self.least_plan_comm, self.least_plan_logic = None, None, None
         self.least_plan_logical_pass = -1
@@ -1421,18 +1540,17 @@ class NesyAgent(AbstractAgent):
             ranking_hotel, self.memory["accommodations"], query, query_room_number
         )
 
-        self.innercity_transports_ranking_from_query = (
-            self.ranking_innercity_transport_from_query(query)
-        )
+        self.innercity_transports_ranking_from_query = self.ranking_innercity_transport_from_query(query)
 
         for go_i in ranking_go:
-
             go_info_i = go_info.iloc[go_i]
             poi_plan["go_transport"] = go_info_i
+            self.search_nodes += 1
 
             ranking_back = self.ranking_intercity_transport_back(
                 back_info, query, go_info_i
             )
+
             ranking_back = self.reranking_intercity_transport_back_with_constraints(
                 ranking_back, back_info, query, go_info_i
             )
@@ -1440,29 +1558,19 @@ class NesyAgent(AbstractAgent):
             for back_i in ranking_back:
                 back_info_i = back_info.iloc[back_i]
                 poi_plan["back_transport"] = back_info_i
-
-                print(poi_plan)
-
-                # print(query)
+                self.search_nodes += 1
 
                 if query["days"] > 1:
-
-                    # print(num_hotel)
                     for hotel_i in ranking_hotel:
-
-                        # print(hotel_i)
-
-                        poi_plan["accommodation"] = self.memory["accommodations"].iloc[
-                            hotel_i
-                        ]
-
+                        poi_plan["accommodation"] = self.memory["accommodations"].iloc[hotel_i]
                         room_type = poi_plan["accommodation"]["numbed"]
+                        self.search_nodes += 1
 
-                        required_rooms = (
-                            int((query["people_number"] - 1) / room_type) + 1
-                        )
+                        required_rooms = (int((query["people_number"] - 1) / room_type) + 1)
 
                         if query_room_type != None and query_room_type != room_type:
+                            self.backtrack_count += 1
+                            print("room_type not match, backtrack...")
                             continue
 
                         if query_room_number != None:
@@ -1474,11 +1582,12 @@ class NesyAgent(AbstractAgent):
                             if (
                                 room_type * required_rooms >= query["people_number"]
                             ) and (
-                                room_type * required_rooms
-                                < query["people_number"] + room_type
+                                room_type * required_rooms < query["people_number"] + room_type
                             ):
                                 pass
                             else:
+                                self.backtrack_count += 1
+                                print("room_number not match, backtrack...")
                                 continue
                         self.required_rooms = required_rooms
 
@@ -1497,6 +1606,8 @@ class NesyAgent(AbstractAgent):
                             * (self.query["days"] - 1)
                             * 100
                         ):
+                            self.backtrack_count += 1
+                            print("required_budget - intercity_with_hotel_cost <= 100 * people_number * (days-1), backtrack...")
                             continue
 
                         print("search: ...")
@@ -1510,17 +1621,27 @@ class NesyAgent(AbstractAgent):
                             )
                         except TimeOutError as e:
                             print("TimeOutError")
-                            return False, {}
+                            return False, {"error_info": "TimeOutError"}
                         # exit(0)
 
+                        print(success, plan)
                         if success:
                             return True, plan
+                        else:
+                            if time.time() > self.time_before_search + self.TIME_CUT:
+                                print("Searching TIME OUT !!!")
+                                return False, {"error_info": "TimeOutError"}
+
+                            self.backtrack_count += 1
+                            print("search failed given the intercity-transport and hotels, backtrack...")
 
                 else:
                     if time_compare_if_earlier_equal(
                         poi_plan["back_transport"]["BeginTime"],
                         poi_plan["go_transport"]["EndTime"],
                     ):
+                        self.backtrack_count += 1
+                        print("back_transport BeginTime earlier than go_transport EndTime, backtrack...")
                         continue
 
                     self.intercity_with_hotel_cost = (
@@ -1538,18 +1659,21 @@ class NesyAgent(AbstractAgent):
                         )
                     except TimeOutError as e:
                         print("TimeOutError")
-                        return False, {}
+                        return False, {"error_info": "TimeOutError"}
 
                     print(success, plan)
                     if success:
                         return True, plan
                     else:
                         if time.time() > self.time_before_search + self.TIME_CUT:
-
                             print("Searching TIME OUT !!!")
-                            return False, {}
+                            return False, {"error_info": "TimeOutError"}
+                        
+                        self.backtrack_count += 1
+                        print("search failed given the intercity-transport and hotels, backtrack...")
 
-        return False, {}
+
+        return False, {"error_info": "No solution found."}
 
     def symbolic_search(self, symoblic_query):
 
@@ -1560,7 +1684,7 @@ class NesyAgent(AbstractAgent):
         ):
             pass
         else:
-            return False, {}
+            return False, {"error_info": f"Unsupported cities {symoblic_query['start_city']} -> {symoblic_query['target_city']}."}
 
         if self.preference_search:
             # print(symoblic_query["preference_py"])
@@ -1585,6 +1709,8 @@ class NesyAgent(AbstractAgent):
             else:
                 raise ValueError("preference_opt must be maximize or minimize")
 
+
+        
         self.memory["accommodations"] = self.collect_poi_info_all(
             symoblic_query["target_city"], "accommodation"
         )
@@ -1594,8 +1720,6 @@ class NesyAgent(AbstractAgent):
         self.memory["restaurants"] = self.collect_poi_info_all(
             symoblic_query["target_city"], "restaurant"
         )
-
-        # symoblic_query = self.extract_logics(symoblic_query)
 
         # print(symoblic_query)
 
@@ -1627,6 +1751,9 @@ class NesyAgent(AbstractAgent):
         info = self.env(call_str)["data"]
 
         # print(info)
+
+        if not isinstance(info, list):
+            return "No solution"
 
         if len(info) == 3:
             info[1]["price"] = info[1]["cost"]
