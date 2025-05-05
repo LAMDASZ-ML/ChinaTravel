@@ -187,7 +187,6 @@ class Qwen(AbstractLLM):
         if "Qwen3" in model_name:    
             self.sampling_params = SamplingParams(temperature=0.6, top_p=0.95, top_k=20, max_tokens=4096)
             
-            config.save_pretrained(self.path)
         else:
             self.sampling_params = SamplingParams(temperature=0, top_p=0.001, max_tokens=4096)
 
