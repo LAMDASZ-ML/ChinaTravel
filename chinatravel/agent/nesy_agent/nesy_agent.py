@@ -1591,8 +1591,11 @@ class NesyAgent(BaseAgent):
                             ):
                                 pass
                             else:
-                                self.backtrack_count += 1
-                                print("room_number not match, backtrack...")
+                                if query_room_number != None and room_type == 2:
+                                    pass
+                                else:
+                                    self.backtrack_count += 1
+                                    print("room_number * room_type not match, backtrack...")
                                 continue
                         self.required_rooms = required_rooms
 
