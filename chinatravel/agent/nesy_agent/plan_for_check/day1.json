@@ -1,0 +1,49 @@
+{
+    "people_number": 1,
+    "start_city": "上海",
+    "target_city": "杭州",
+    "itinerary": [
+        {
+            "day": 1,
+            "activities": [
+                {
+                    "start_time": "05:26",
+                    "end_time": "07:27",
+                    "start": "上海南站",
+                    "end": "杭州南站",
+                    "price": 65.95,
+                    "cost": 65.95,
+                    "tickets": 1,
+                    "transports": [],
+                    "TrainID": "K335",
+                    "type": "train"
+                },
+                {
+                    "start_time": "07:48",
+                    "end_time": "09:59",
+                    "start": "杭州南站",
+                    "end": "上海南站",
+                    "price": 82.44,
+                    "cost": 82.44,
+                    "tickets": 1,
+                    "transports": [
+                        {
+                            "start": "杭州南站",
+                            "end": "杭州南站",
+                            "mode": "walk",
+                            "start_time": "07:27",
+                            "end_time": "07:27",
+                            "cost": 0.0,
+                            "distance": 0.0,
+                            "price": 0.0
+                        }
+                    ],
+                    "TrainID": "T78",
+                    "type": "train"
+                }
+            ]
+        }
+    ],
+    "search_time_sec": 23.123600244522095,
+    "llm_inference_time_sec": 22.524855375289917
+}

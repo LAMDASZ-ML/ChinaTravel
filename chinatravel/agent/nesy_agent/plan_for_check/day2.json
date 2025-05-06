@@ -1,0 +1,159 @@
+{
+    "people_number": 1,
+    "start_city": "深圳",
+    "target_city": "广州",
+    "itinerary": [
+        {
+            "day": 1,
+            "activities": [
+                {
+                    "start_time": "06:25",
+                    "end_time": "06:58",
+                    "start": "深圳北站",
+                    "end": "广州南站",
+                    "price": 62.52,
+                    "cost": 62.52,
+                    "tickets": 1,
+                    "transports": [],
+                    "TrainID": "D941",
+                    "type": "train"
+                },
+                {
+                    "position": "麓苑轩蒸汽火锅酒家",
+                    "type": "lunch",
+                    "price": 134,
+                    "cost": 134,
+                    "start_time": "11:00",
+                    "end_time": "12:00",
+                    "transports": [
+                        {
+                            "start": "广州南站",
+                            "end": "广州南站-地铁站",
+                            "mode": "walk",
+                            "start_time": "06:58",
+                            "end_time": "07:00",
+                            "cost": 0,
+                            "distance": 0.19,
+                            "price": 0
+                        },
+                        {
+                            "start": "广州南站-地铁站",
+                            "end": "淘金-地铁站",
+                            "mode": "metro",
+                            "start_time": "07:00",
+                            "end_time": "07:32",
+                            "cost": 5,
+                            "distance": 16.43,
+                            "price": 5,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "淘金-地铁站",
+                            "end": "麓苑轩蒸汽火锅酒家",
+                            "mode": "walk",
+                            "start_time": "07:32",
+                            "end_time": "07:38",
+                            "cost": 0,
+                            "distance": 0.53,
+                            "price": 0
+                        }
+                    ]
+                },
+                {
+                    "position": "桔子酒店(广州白云国际机场店)",
+                    "type": "accommodation",
+                    "price": 256,
+                    "cost": 256,
+                    "start_time": "13:45",
+                    "end_time": "24:00",
+                    "transports": [
+                        {
+                            "start": "麓苑轩蒸汽火锅酒家",
+                            "end": "淘金-地铁站",
+                            "mode": "walk",
+                            "start_time": "12:00",
+                            "end_time": "12:06",
+                            "cost": 0,
+                            "distance": 0.53,
+                            "price": 0
+                        },
+                        {
+                            "start": "淘金-地铁站",
+                            "end": "机场北(2号航站楼)-地铁站",
+                            "mode": "metro",
+                            "start_time": "12:06",
+                            "end_time": "13:03",
+                            "cost": 7,
+                            "distance": 28.84,
+                            "price": 7,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "机场北(2号航站楼)-地铁站",
+                            "end": "桔子酒店(广州白云国际机场店)",
+                            "mode": "walk",
+                            "start_time": "13:03",
+                            "end_time": "13:45",
+                            "cost": 0,
+                            "distance": 3.52,
+                            "price": 0
+                        }
+                    ],
+                    "room_type": 1,
+                    "rooms": 1
+                }
+            ]
+        },
+        {
+            "day": 2,
+            "activities": [
+                {
+                    "start_time": "05:03",
+                    "end_time": "06:55",
+                    "start": "广州北站",
+                    "end": "深圳东站",
+                    "price": 41.68,
+                    "cost": 41.68,
+                    "tickets": 1,
+                    "transports": [
+                        {
+                            "start": "桔子酒店(广州白云国际机场店)",
+                            "end": "机场北(2号航站楼)-地铁站",
+                            "mode": "walk",
+                            "start_time": "00:00",
+                            "end_time": "00:42",
+                            "cost": 0,
+                            "distance": 3.52,
+                            "price": 0
+                        },
+                        {
+                            "start": "机场北(2号航站楼)-地铁站",
+                            "end": "广州北站-地铁站",
+                            "mode": "metro",
+                            "start_time": "00:42",
+                            "end_time": "01:03",
+                            "cost": 4,
+                            "distance": 10.86,
+                            "price": 4,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "广州北站-地铁站",
+                            "end": "广州北站",
+                            "mode": "walk",
+                            "start_time": "01:03",
+                            "end_time": "01:06",
+                            "cost": 0,
+                            "distance": 0.25,
+                            "price": 0
+                        }
+                    ],
+                    "TrainID": "K9259",
+                    "type": "train"
+                }
+            ]
+        }
+    ],
+    "search_time_sec": 66.41920399665833,
+    "llm_inference_time_sec": 45.75778794288635
+}
