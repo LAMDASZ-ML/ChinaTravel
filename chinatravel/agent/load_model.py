@@ -60,8 +60,8 @@ def init_agent(kwargs):
     return agent
 
 
-def init_llm(llm_name, extend65536=False):
-    from .llms import Deepseek, GPT4o, GLM4Plus, Qwen, Mistral, Llama
+def init_llm(llm_name, max_model_len=None,extend65536=False):
+    from .llms import Deepseek, GPT4o, GLM4Plus, Qwen, Mistral, Llama, EmptyLLM
 
     if llm_name == "deepseek":
         llm = Deepseek()
@@ -70,11 +70,13 @@ def init_llm(llm_name, extend65536=False):
     elif llm_name == "glm4-plus":
         llm = GLM4Plus()
     elif "Qwen" in llm_name:
-        llm = Qwen(llm_name, extend65536=extend65536)
+        llm = Qwen(llm_name, max_model_len=max_model_len)
     elif llm_name == "mistral":
-        llm = Mistral(extend65536=extend65536)
+        llm = Mistral(max_model_len=max_model_len)
     elif "Llama" in llm_name:
         llm = Llama(llm_name)
+    elif llm_name == "rule":
+        return EmptyLLM()
     else:
         raise Exception("Not Implemented")
 

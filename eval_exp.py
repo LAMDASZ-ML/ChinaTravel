@@ -98,14 +98,18 @@ if __name__ == "__main__":
         os.makedirs("eval_res/")
     if not os.path.exists("eval_res/splits_{}/".format(args.splits)):
         os.makedirs("eval_res/splits_{}/".format(args.splits))
+    
 
-
-    # print(result_data)
-    # exit(0)
 
     for method in method_list:
 
+        print("method: ", method)
 
+        plan_count = 0
+        for plan in result_data[method]:
+            if plan != {}:
+                plan_count += 1
+        print("There are {} results...".format(plan_count))
 
 
         print("Method: {}".format(method))
@@ -137,6 +141,10 @@ if __name__ == "__main__":
         #     if passid not in commonsense_pass_id:
         #         print("schema pass but commonsense fail: {}".format(passid))
         #         # print(result_data[method][passid])
+        for passid in commonsense_pass_id:
+            if passid not in schema_pass_id:
+                print("commonsense pass but schema fail: {}".format(passid))
+                # print(result_data[method][passid])
 
         # print("Logical constraints (flat version):")
         # macro_logi, micro_logi, logi_result_agg, logi_pass_id_flat = evaluate_hard_constraints(

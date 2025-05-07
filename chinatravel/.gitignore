@@ -1,4 +1,5 @@
 environment/database/*
 data/human1000/*
 data/human150/*
+data/easy/*
 local_llm/*

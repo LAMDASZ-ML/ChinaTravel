@@ -178,7 +178,7 @@ class GPT4o(AbstractLLM):
 
 
 class Qwen(AbstractLLM):
-    def __init__(self, model_name, extend65536=False):
+    def __init__(self, model_name, max_model_len=None):
         super().__init__()
         self.path = os.path.join(
             project_root_path, "chinatravel", "local_llm", model_name
@@ -190,11 +190,11 @@ class Qwen(AbstractLLM):
         else:
             self.sampling_params = SamplingParams(temperature=0, top_p=0.001, max_tokens=4096)
 
-        if extend65536:
+        if max_model_len is not None and max_model_len > 32768:
             config = AutoConfig.from_pretrained(self.path)
             config.rope_scaling = {
                     "type": "yarn", 
-                    "factor": 2.0,  # 原长 32,768 → 扩展到 32,768 * 2 = 65536
+                    "factor": max_model_len//32768, # 2.0,  # 原长 32,768 → 扩展到 32,768 * 2 = 65536
                     "original_max_position_embeddings": 32768
                 }
             config.save_pretrained(self.path)
@@ -207,21 +207,20 @@ class Qwen(AbstractLLM):
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.path)
 
-        if extend65536:
-            self.llm = LLM(
-                model=self.path,
-                gpu_memory_utilization=0.95,
-                max_model_len=65536,  # 强制上下文长度为 65536
-                enable_prefix_caching=True,  # 可选：启用前缀缓存优化长文本
-            )
-        else:
-            self.llm = LLM(
-                model=self.path,
-                gpu_memory_utilization=0.95,
-                enable_prefix_caching=True,  # 可选：启用前缀缓存优化长文本
-            )
+        if max_model_len is None:
+            max_model_len = 32768
             
+        self.llm = LLM(
+            model=self.path,
+            gpu_memory_utilization=0.95,
+            max_model_len=max_model_len,  # 强制上下文长度为 65536
+            # max_num_seqs = 1,           # Limit batch size
+            # tensor_parallel_size=2,     # GPUs=2
+            enable_prefix_caching=(max_model_len>=32768),  # 可选：启用前缀缓存优化长文本
+        )
+
         self.name = model_name
+        self.max_model_len = max_model_len
 
         
 
@@ -242,8 +241,8 @@ class Qwen(AbstractLLM):
             self.input_token_count += len(input_tokens)       
             self.input_token_maxx = max(self.input_token_maxx, len(input_tokens))
             
-            if len(input_tokens) >= 65536:
-                return '{"error": "Input prompt is longer than 65536 tokens."}'
+            if len(input_tokens) >= self.max_model_len:
+                return str({"error": f"Input prompt is longer than {self.max_model_len} tokens."})
             # conduct text completion
             outputs = self.llm.generate([text], self.sampling_params)
 
@@ -276,8 +275,8 @@ class Qwen(AbstractLLM):
             self.input_token_count += len(input_tokens)        
             self.input_token_maxx = max(self.input_token_maxx, len(input_tokens))
             
-            if len(input_tokens) >= 65536:
-                return '{"error": "Input prompt is longer than 65536 tokens."}'
+            if len(input_tokens) >= self.max_model_len:
+                return str({"error": f"Input prompt is longer than {self.max_model_len} tokens."})
 
             outputs = self.llm.generate([text], self.sampling_params)
             res_str = outputs[0].outputs[0].text
@@ -298,19 +297,22 @@ class Qwen(AbstractLLM):
 
 
 class Mistral(AbstractLLM):
-    def __init__(self, extend65536=False):
+    def __init__(self, max_model_len=None):
         super().__init__()
         self.path = os.path.join(
             project_root_path, "chinatravel", "local_llm", "Mistral-7B-Instruct-v0.3",
         )
-        
-        if extend65536:
+        self.sampling_params = SamplingParams(
+            temperature=0, top_p=0.001, max_tokens=4096
+        )
+
+        if max_model_len is not None and max_model_len > 32768:
             config = AutoConfig.from_pretrained(self.path)
             config.rope_scaling = {
-                    "type": "yarn", 
-                    "factor": 2.0,  # 原长 32,768 → 扩展到 32,768 * 2 = 65536
-                    "original_max_position_embeddings": 32768
-                }
+                "type": "yarn", 
+                "factor": max_model_len // 32768,
+                "original_max_position_embeddings": 32768
+            }
             config.save_pretrained(self.path)
             os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1"
         else:
@@ -318,26 +320,22 @@ class Mistral(AbstractLLM):
             if "rope_scaling" in config.to_dict():
                 del config.rope_scaling
             config.save_pretrained(self.path)
-        
+
         self.tokenizer = AutoTokenizer.from_pretrained(self.path)
-        self.sampling_params = SamplingParams(
-            temperature=0, top_p=0.001, max_tokens=4096
+
+        if max_model_len is None:
+            max_model_len = 32768
+
+        self.llm = LLM(
+            model=self.path,
+            gpu_memory_utilization=0.95,
+            max_model_len=max_model_len,
+            # max_num_seqs = 1,           # Limit batch size
+            # tensor_parallel_size=2,     # GPUs=2
+            enable_prefix_caching=(max_model_len>=32768),  # 可选：启用前缀缓存优化长文本
         )
-        
-        if extend65536:
-            self.llm = LLM(
-                model=self.path,
-                gpu_memory_utilization=0.95,
-                max_model_len=65536,  # 强制上下文长度为 65536
-                enable_prefix_caching=True,  # 可选：启用前缀缓存优化长文本
-            )
-        else:
-            self.llm = LLM(
-                model=self.path,
-                gpu_memory_utilization=0.95,
-                enable_prefix_caching=True,  # 可选：启用前缀缓存优化长文本
-            )
         self.name = "Mistral-7B-Instruct-v0.3"
+        self.max_model_len = max_model_len
 
     def _get_response(self, messages, one_line, json_mode):
         messages = merge_repeated_role(messages)
@@ -349,25 +347,23 @@ class Mistral(AbstractLLM):
         self.input_token_count += len(input_tokens)
         self.input_token_maxx = max(self.input_token_maxx, len(input_tokens))
 
-        try:
-            # res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
-            
-            outputs = self.llm.generate([text], self.sampling_params)
-            res_str = outputs[0].outputs[0].text
-            
-            output_token_ids = outputs[0].outputs[0].token_ids
-            self.output_token_count += len(output_token_ids)
-            
-            if json_mode:
-                res_str = repair_json(res_str, ensure_ascii=False)
-            elif one_line:
-                res_str = res_str.split("\n")[0]
-        except Exception as e:
-            print("error: ", e)
-            res_str = '{"error": "Request failed, please try again."}'
-        # print("---mistral_output---")
-        # print(res_str)
-        # print("---mistral_output_end---")
+        if len(input_tokens) >= self.max_model_len:
+            return str({"error": f"Input prompt is longer than {self.max_model_len} tokens."})
+
+        # try:
+        outputs = self.llm.generate([text], self.sampling_params)
+        res_str = outputs[0].outputs[0].text
+        
+        output_token_ids = outputs[0].outputs[0].token_ids
+        self.output_token_count += len(output_token_ids)
+        
+        if json_mode:
+            res_str = repair_json(res_str, ensure_ascii=False)
+        elif one_line:
+            res_str = res_str.split("\n")[0]
+        # except Exception as e:
+        #     print("error: ", e)
+        #     res_str = '{"error": "Request failed, please try again."}'
         return res_str
 
 
@@ -429,6 +425,13 @@ class Llama(AbstractLLM):
         print(res_str)
         return res_str
 
+class EmptyLLM(AbstractLLM):
+    def __init__(self):
+        super().__init__()
+        self.name = "EmptyLLM"
+
+    def _get_response(self, messages, one_line, json_mode):
+        return "Empty LLM response"
 
 if __name__ == "__main__":
     # model = Mistral()

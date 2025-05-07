@@ -85,10 +85,16 @@ if __name__ == "__main__":
     print("res_dir: ", res_dir)
     print("log_dir:", log_dir)
 
+    if args.agent in ["LLM-modulo"]:
+        max_model_len = 65536
+    elif args.agent in ["LLMNeSy"]:
+        max_model_len = 8192
+    else:
+        max_model_len = None
     kwargs = {
         "method": args.agent,
         "env": WorldEnv(),
-        "backbone_llm": init_llm(args.llm, extend65536=(args.agent in ["LLM-modulo"])),
+        "backbone_llm": init_llm(args.llm, max_model_len=max_model_len, extend65536=(args.agent in ["LLM-modulo"])),
         "cache_dir": cache_dir,
         "log_dir": log_dir, 
         "debug": True,

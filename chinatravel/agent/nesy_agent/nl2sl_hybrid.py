@@ -207,11 +207,6 @@ For return value of activity_position(activity), it will be checked by whether t
 Also hotel_names should be checked by activity_position(activity), not accommodation_type(activity, target_city(plan)) and so for other names.
 Usually, for attractions and restaurants, if the required one exists, the requirement is satisfied. However, for accommodation, people usually stay in the same hotel for the whole trip, so we need check all the accommodation activities in the plan. Either change the function or value to make the code block correct.
 You must output the whole code block. Including those constraints that are correct.
-If you find something that really can not be transform into what we offer above, you need to output in the format below:
-[
-    "OOD!!!",
-]
-For example, if the user requires "热门景点" and any type in the list we offer above can be popular or not, you can not find a similar one in the list we offer above. You need to output "OOD!!!" in the code block.
 The original code block is:
 """
 )
@@ -323,8 +318,11 @@ def check(query):
                 vars_dict,
             )
         except Exception as e:
-            run_error_list.append(str(e))
-            run_error_idx.append(idx)
+            if str(e) not in [
+                "Failed to create Point instance from string: unknown format.",
+            ]:
+                run_error_list.append(str(e))
+                run_error_idx.append(idx)
     return run_error_list, run_error_idx
 
 
@@ -387,6 +385,7 @@ def nl2sl_step3(query, backbone_llm, checker, max_trails=5):
                 "cnt": cnt,
                 "run_error_list": run_error_list,
                 "value_error_list": value_error_list,
+                "hard_logic_py": query["hard_logic_py"],
             }
         )
         flag = len(run_error_list + value_error_list) == 0
@@ -395,30 +394,44 @@ def nl2sl_step3(query, backbone_llm, checker, max_trails=5):
         query, _ = reflect(query, backbone_llm, run_error_list, value_error_list)
         query["hard_logic_py"] = list(set(query["hard_logic_py"]))
 
-        if "OOD!!!" in query["hard_logic_py"]:
-            run_error_list, run_error_idx, value_error_list, value_error_idx = (
-                reflect_info(query, checker)
-            )
-            query["ood"] = True
-            ood_idx = list(set(run_error_idx + value_error_idx))
-            for idx in ood_idx:
-                query["hard_logic_py_ood"].append(query["hard_logic_py"][idx])
-            for ood_logic in query["hard_logic_py_ood"]:
-                query["hard_logic_py"].remove(ood_logic)
-            return query
+        # if "OOD!!!" in query["hard_logic_py"]:
+        #     run_error_list, run_error_idx, value_error_list, value_error_idx = (
+        #         reflect_info(query, checker)
+        #     )
+        #     query["ood"] = True
+        #     ood_idx = list(set(run_error_idx + value_error_idx))
+        #     for idx in ood_idx:
+        #         query["hard_logic_py_ood"].append(query["hard_logic_py"][idx])
+        #     for ood_logic in query["hard_logic_py_ood"]:
+        #         query["hard_logic_py"].remove(ood_logic)
+        #     return query
 
         cnt += 1
     query["reflect_cnt"] = cnt
     run_error_list, run_error_idx, value_error_list, value_error_idx = reflect_info(
         query, checker
     )
-    ood_idx = list(set(run_error_idx + value_error_idx))
-    if len(ood_idx):
-        query["ood"] = True
-        for idx in ood_idx:
-            query["hard_logic_py_ood"].append(query["hard_logic_py"][idx])
-        for ood_logic in query["hard_logic_py_ood"]:
-            query["hard_logic_py"].remove(ood_logic)
+    query["reflect_info"].append(
+        {
+            "cnt": cnt,
+            "run_error_list": run_error_list,
+            "value_error_list": value_error_list,
+            "hard_logic_py": query["hard_logic_py"],
+        }
+    )
+    error_indices = set(run_error_list + value_error_list)
+    query["hard_logic_py"] = [
+        val
+        for idx, val in enumerate(query["hard_logic_py"])
+        if idx not in error_indices
+    ]
+    # ood_idx = list(set(run_error_idx + value_error_idx))
+    # if len(ood_idx):
+    #     query["ood"] = True
+    #     for idx in ood_idx:
+    #         query["hard_logic_py_ood"].append(query["hard_logic_py"][idx])
+    #     for ood_logic in query["hard_logic_py_ood"]:
+    #         query["hard_logic_py"].remove(ood_logic)
     return query
 
 
@@ -452,6 +465,7 @@ def nl2sl(query, backbone_llm, checker, cache_dir="cache_hybrid"):
     query = nl2sl_step1(query, backbone_llm)
     query = nl2sl_step2(query, backbone_llm)
     query = nl2sl_step3(query, backbone_llm, checker)
+
     save_json_file(query, file_path)
     return query
 
@@ -478,6 +492,8 @@ def nl2sl_reflect(query, backbone_llm):
     query = nl2sl_step1(query, backbone_llm)
     query = nl2sl_step2(query, backbone_llm)
     query = nl2sl_step3(query, backbone_llm, checker)
+    query["hard_logic_py_iter_3"] = query["hard_logic_py"] 
+
     return query
 
 

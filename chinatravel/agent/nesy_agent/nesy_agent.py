@@ -82,6 +82,7 @@ class NesyAgent(BaseAgent):
         self.search_width = kwargs.get("search_width", None)
 
         self.preference_search = False
+        self.prompt_upd = True
 
     def reset(self):
         pass
