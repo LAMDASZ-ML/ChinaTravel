@@ -137,6 +137,12 @@ class NesyAgent(BaseAgent):
             self.debug,
         )
 
+
+        self.backbone_llm.input_token_count = 0
+        self.backbone_llm.output_token_count = 0
+        self.backbone_llm.input_token_maxx = 0
+
+
         # natural language -> symoblic language -> plan
 
         if not oralce_translation:
@@ -1517,10 +1523,6 @@ class NesyAgent(BaseAgent):
         self.restaurant_names_visiting = []
         self.ranking_attractions_flag = False
         self.ranking_restaurants_flag = False
-
-        self.backbone_llm.input_token_count = 0
-        self.backbone_llm.output_token_count = 0
-        self.backbone_llm.input_token_maxx = 0
 
         self.llm_rec_format_error = 0
         self.llm_rec_count = 0
