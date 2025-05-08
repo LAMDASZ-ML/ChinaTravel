@@ -113,6 +113,10 @@ if __name__ == "__main__":
     elif 'mistral' in args.method:
         input_price = 0.0001 * 1e-3   
         output_price = 0.0002 * 1e-3     
+    elif 'Qwen3-8B' in args.method:
+        input_price = 0.035 * 1e-6
+        output_price = 0.138 * 1e-6
+        # https://openrouter.ai/qwen/qwen3-8b
     else:
         raise Exception('Please provide the price for the method: {}'.format(args.method))
     

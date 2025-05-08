@@ -252,14 +252,20 @@ def nl2sl_step1(query, backbone_llm):
     messages = [{"role": "user", "content": NL2SL_INSTRUCTION.format(nature_language)}]
     # print(messages[0]["content"])
     query_ = backbone_llm(messages, one_line=False, json_mode=True)
-    l_ptr = query_.find("{")
-    r_ptr = query_.rfind("}")
-    if l_ptr != -1 and r_ptr != -1:
-        query_ = query_[l_ptr : r_ptr + 1]
+    
+    try:
+        l_ptr = query_.find("{")
+        r_ptr = query_.rfind("}")
+        if l_ptr != -1 and r_ptr != -1:
+            query_ = query_[l_ptr : r_ptr + 1]
+        
+        query_ = json.loads(query_)
+        for key in query_:
+            query[key] = query_[key]
+    except Exception as e:
+        query["hard_logic"] = []
+        return query
 
-    query_ = json.loads(query_)
-    for key in query_:
-        query[key] = query_[key]
 
     return query
 
