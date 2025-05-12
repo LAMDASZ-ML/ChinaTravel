@@ -25,7 +25,7 @@ def validate_json(json_data, schema):
         validate(instance=json_data, schema=schema)
         return True
     except jsonschema.exceptions.ValidationError as e:
-        # return e
+        # raise e
         # print(e)
         return False
 
@@ -50,7 +50,7 @@ def evaluate_schema_constraints(data_index, plan_json_dict, schema):
                 succ_flag = 1
                 pass_id.append(idx)
         except Exception as e:
-
+            print(idx, e)
             pass
         
 
