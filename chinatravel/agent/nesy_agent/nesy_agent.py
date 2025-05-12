@@ -773,7 +773,11 @@ class NesyAgent(BaseAgent):
                     print("inner-city transport error, backtrack...")
                     continue
 
-                arrived_time = transports_sel[-1]["end_time"]
+                if len(transports_sel) == 0:
+                    arrived_time = current_time
+                else:
+                    arrived_time = transports_sel[-1]["end_time"]
+
 
             try:
                 tmp_plan = self.add_restaurant(
@@ -855,7 +859,11 @@ class NesyAgent(BaseAgent):
                     print("inner-city transport error, backtrack...")
                     continue
 
-                arrived_time = transports_sel[-1]["end_time"]
+                if len(transports_sel) == 0:
+                    arrived_time = current_time
+                else:
+                    arrived_time = transports_sel[-1]["end_time"]
+
 
             try:
                 tmp_plan = self.add_attraction(
@@ -1084,7 +1092,11 @@ class NesyAgent(BaseAgent):
                             print("inner-city transport error, backtrack...")
                             continue
 
-                        arrived_time = transports_sel[-1]["end_time"]
+                        if len(transports_sel) == 0:
+                            arrived_time = current_time
+                        else:
+                            arrived_time = transports_sel[-1]["end_time"]
+
 
                     plan = self.add_accommodation(
                         current_plan=plan,
@@ -1173,7 +1185,11 @@ class NesyAgent(BaseAgent):
                                     print("inner-city transport error, backtrack...")
                                     continue
 
-                                arrived_time = transports_sel[-1]["end_time"]
+                                if len(transports_sel) == 0:
+                                    arrived_time = current_time
+                                else:
+                                    arrived_time = transports_sel[-1]["end_time"]
+
 
                                 try:
                                     plan = self.add_restaurant(
@@ -1274,8 +1290,11 @@ class NesyAgent(BaseAgent):
                                     self.backtrack_count += 1
                                     print("inner-city transport error, backtrack...")
                                     continue
+                                if len(transports_sel) == 0:
+                                    arrived_time = current_time
+                                else:
+                                    arrived_time = transports_sel[-1]["end_time"]
 
-                                arrived_time = transports_sel[-1]["end_time"]
                                 opentime, endtime = (
                                     poi_sel["opentime"],
                                     poi_sel["endtime"],
@@ -1423,7 +1442,11 @@ class NesyAgent(BaseAgent):
                             print("inner-city transport error, backtrack...")
                             continue
 
-                        arrived_time = transports_sel[-1]["end_time"]
+                        if len(transports_sel) == 0:
+                            arrived_time = current_time
+                        else:
+                            arrived_time = transports_sel[-1]["end_time"]
+
 
                         plan = self.add_accommodation(
                             current_plan=plan,
@@ -1785,11 +1808,15 @@ class NesyAgent(BaseAgent):
         return info
 
     def collect_intercity_transport(self, source_city, target_city, trans_type):
-        trans_info = self.env(
+
+        info_return = self.env(
             "intercity_transport_select('{source_city}', '{target_city}', '{trans_type}')".format(
                 source_city=source_city, target_city=target_city, trans_type=trans_type
             )
-        )["data"]
+        )
+        if not info_return["success"]:
+            return pd.DataFrame([])
+        trans_info = info_return["data"]
         # print(poi_info)
         while True:
             info_i = self.env("next_page()")["data"]

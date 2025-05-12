@@ -275,7 +275,9 @@ def nl2sl_step2(query, backbone_llm):
         query["hard_logic"] = [str(hl) for hl in query["hard_logic"]]
         hard_logic = "\n".join(query["hard_logic"])
     except Exception as e:
+        query["hard_logic"] = []
         query["hard_logic_py"] = []
+        return query
     messages = [
         {
             "role": "user",

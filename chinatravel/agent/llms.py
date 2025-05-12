@@ -5,6 +5,7 @@ from transformers import AutoTokenizer
 from transformers import AutoConfig
 
 # from modelscope import AutoModelForCausalLM, AutoTokenizer
+import tiktoken
 
 from vllm import LLM, SamplingParams
 import re
@@ -147,13 +148,29 @@ class GPT4o(AbstractLLM):
         super().__init__()
         self.llm = OpenAI()
         self.name = "GPT4o"
+        self.tokenizer = tiktoken.encoding_for_model("gpt-4o")
+
 
     def _send_request(self, messages, kwargs):
+
+        # print(messages)
+        tokens = self.tokenizer.encode(messages[-1]["content"])
+        self.input_token_count += len(tokens)
+        self.input_token_maxx = max(self.input_token_maxx, len(tokens))
+
+        # print(tokens)
+        # print(self.input_token_count)
+        # exit(0)
+
         res_str = (
             self.llm.chat.completions.create(messages=messages, **kwargs)
             .choices[0]
             .message.content
         )
+        
+        tokens = self.tokenizer.encode(res_str)
+        self.output_token_count += len(tokens)
+
         res_str = res_str.strip()
         return res_str
 
@@ -173,6 +190,7 @@ class GPT4o(AbstractLLM):
             if json_mode:
                 res_str = repair_json(res_str, ensure_ascii=False)
         except Exception as e:
+            print(e)
             res_str = '{"error": "Request failed, please try again."}'
         return res_str
 
