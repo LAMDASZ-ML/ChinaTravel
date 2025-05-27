@@ -10,6 +10,10 @@ Official codebase for the paper "ChinaTravel: A Real-World Benchmark for Languag
 [![Webpage](https://img.shields.io/badge/Webpage-Visit-blue)](https://www.lamda.nju.edu.cn/shaojj/chinatravel/)
 [![Paper](https://img.shields.io/badge/Paper-View-red)](https://arxiv.org/abs/2412.13682)
 [![Dataset(Huggingface)](https://img.shields.io/badge/Dataset-Huggingface-yellow)](https://huggingface.co/datasets/LAMDA-NeSy/ChinaTravel)
+[![Competition(TPC@2025)](https://img.shields.io/badge/IJCAI%20Competition-TPC@2025-green)](https://chinatravel-competition.github.io/IJCAI2025/)
+
+
+
 
 <!-- 
 ![Overview](images/overview.png) -->
@@ -28,7 +32,7 @@ Participants are invited to develop novel agents that can tackle real-world trav
 ### 2025.05
 
 1. Update logs for the latest version.
-2. Provide the evaluation code for the TPC. 
+2. Provide the evaluation code for the TPC.
 
 ### 2025.04
 
@@ -95,6 +99,7 @@ python run_exp.py --splits human --agent LLM-modulo --llm Qwen3-8B --refine_step
 **Note**:
 
 - The `--oracle_translation` flag enables access to annotated ground truth including:
+
   - `hard_logic_py`: Executable verification DSL code
   - `hard_logic_nl`: The corrsponding constraint descriptions
   - Example annotation structure:
@@ -112,7 +117,7 @@ python run_exp.py --splits human --agent LLM-modulo --llm Qwen3-8B --refine_step
       "
       innercity_transport_set=set()
       for activity in allactivities(plan):
-          if activity_transports(activity)!=[]:                
+          if activity_transports(activity)!=[]:              
               innercity_transport_set.add(innercity_transport_type(activity_transports(activity)))
       result=(innercity_transport_set<={'taxi'})
       "
@@ -132,12 +137,11 @@ python eval_exp.py --splits human --method LLM-modulo_Qwen3-8B_10steps_oracletra
 
 ```
 
-In TPC@IJCAI2025, the evaluation code is provided in the `eval_tpc.py` file. You can run the evaluation code as follows: 
+In TPC@IJCAI2025, the evaluation code is provided in the `eval_tpc.py` file. You can run the evaluation code as follows:
+
 ```bash
 python eval_tpc.py --splits tpc_phase1 --method YOUR_METHOD_NAME
 ```
-
-
 
 ## 📚 Docs
 
@@ -147,10 +151,13 @@ python eval_tpc.py --splits tpc_phase1 --method YOUR_METHOD_NAME
 ## 🛠️ Advanced Development
 
 ### 1. Develop Your Own Agent Algorithm
+
 To develop your own agent algorithm, you need to inherit the `BaseAgent` class from `chinatravel/agent/base.py` and add the logic for your algorithm to the `init_agent` function in `chinatravel/agent/load_model.py`. We provide an empty agent example named `TPCAgent`.
 
 Steps:
+
 - **Inherit the `BaseAgent` class**: Create a new Python file in the `chinatravel/agent` directory and define your own agent class, inheriting from `BaseAgent`.
+
 ```python:chinatravel/agent/your_agent.py
 from .base import BaseAgent
 
@@ -163,7 +170,9 @@ class YourAgent(BaseAgent):
         # Implement the decision - making logic of the agent
         pass
 ```
+
 - **Add code to the init_agent function**: Open the chinatravel/agent/load_model.py file and add support for your new agent in the init_agent function.
+
 ```python:
 def init_agent(kwargs):
     # ... existing code ...
@@ -174,10 +183,14 @@ def init_agent(kwargs):
     # ... existing code ...
     return agent
 ```
+
 ### 2. Develop Your Own Local LLM
+
 To develop your own local large - language model (LLM), you need to inherit the AbstractLLM class from chinatravel/agent/llms.py and add the corresponding local LLM inference code in llms.py. We provide an empty LLM example named TPCLLM.
 Steps:
+
 - **Inherit the AbstractLLM class**:  Define your own LLM class in the chinatravel/agent/llms.py file, inheriting from AbstractLLM.
+
 ```python
 class YourLLM(AbstractLLM):
     def __init__(self):
@@ -196,7 +209,9 @@ class YourLLM(AbstractLLM):
             response = response.split("\n")[0]
         return response
 ```
-- **Add code to the init_agent function**: Open the chinatravel/agent/load_model.py file and add support for your new llm in the init_llm function. 
+
+- **Add code to the init_agent function**: Open the chinatravel/agent/load_model.py file and add support for your new llm in the init_llm function.
+
 ```python:
 def init_llm(kwargs):
     # ... existing code ...
@@ -207,6 +222,7 @@ def init_llm(kwargs):
 ```
 
 ### 3. Run Your Code Using Experiment Scripts
+
 After completing the above development, you can use the experiment scripts to run your code.
 
 Example of running:
@@ -215,9 +231,8 @@ Example of running:
 python run_exp.py --splits easy --agent TPCAgent --llm TPCLLM
 python run_exp.py --splits easy --agent YourMethodName --llm YourLLMName
 ```
+
 The results will be saved in the `results/YourMethodName_YourLLMName_xxx` directory, e.g., `results/TPCAgent_TPCLLM`.
-
-
 
 ## ✉️ Contact
 
@@ -237,3 +252,4 @@ If our paper or related resources prove valuable to your research, we kindly ask
       primaryClass={cs.AI},
       url={https://arxiv.org/abs/2412.13682}, 
 }
+```
