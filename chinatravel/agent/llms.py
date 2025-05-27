@@ -2,11 +2,13 @@ from abc import ABC, abstractmethod
 from openai import OpenAI
 from json_repair import repair_json
 from transformers import AutoTokenizer
+from transformers import AutoConfig
 
-from modelscope import AutoModelForCausalLM, AutoTokenizer
+# from modelscope import AutoModelForCausalLM, AutoTokenizer
+import tiktoken
 
 from vllm import LLM, SamplingParams
-
+import re
 import sys
 import os
 
@@ -36,6 +38,9 @@ class AbstractLLM(ABC):
         pass
 
     def __init__(self):
+        self.input_token_count = 0
+        self.output_token_count = 0
+        self.input_token_maxx = 0
         pass
 
     def __call__(self, messages, one_line=True, json_mode=False):
@@ -56,14 +61,29 @@ class Deepseek(AbstractLLM):
         self.llm = OpenAI(
             base_url="https://api.deepseek.com",
         )
+        self.path = os.path.join(
+            project_root_path, "chinatravel", "local_llm", "deepseek_v3_tokenizer"
+        )
         self.name = "DeepSeek-V3"
 
+        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+
     def _send_request(self, messages, kwargs):
+
+        text = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        input_tokens = self.tokenizer(text)["input_ids"]
+
+        self.input_token_count += len(input_tokens)
+        self.input_token_maxx = max(self.input_token_maxx, len(input_tokens))
+        
         res_str = (
             self.llm.chat.completions.create(messages=messages, **kwargs)
             .choices[0]
             .message.content
         )
+        output_tokens = self.tokenizer(res_str)["input_ids"]
+        self.output_token_count += len(output_tokens)
+        
         res_str = res_str.strip()
         return res_str
 
@@ -128,13 +148,29 @@ class GPT4o(AbstractLLM):
         super().__init__()
         self.llm = OpenAI()
         self.name = "GPT4o"
+        self.tokenizer = tiktoken.encoding_for_model("gpt-4o")
+
 
     def _send_request(self, messages, kwargs):
+
+        # print(messages)
+        tokens = self.tokenizer.encode(messages[-1]["content"])
+        self.input_token_count += len(tokens)
+        self.input_token_maxx = max(self.input_token_maxx, len(tokens))
+
+        # print(tokens)
+        # print(self.input_token_count)
+        # exit(0)
+
         res_str = (
             self.llm.chat.completions.create(messages=messages, **kwargs)
             .choices[0]
             .message.content
         )
+        
+        tokens = self.tokenizer.encode(res_str)
+        self.output_token_count += len(tokens)
+
         res_str = res_str.strip()
         return res_str
 
@@ -154,37 +190,62 @@ class GPT4o(AbstractLLM):
             if json_mode:
                 res_str = repair_json(res_str, ensure_ascii=False)
         except Exception as e:
+            print(e)
             res_str = '{"error": "Request failed, please try again."}'
         return res_str
 
 
 class Qwen(AbstractLLM):
-    def __init__(self, model_name):
+    def __init__(self, model_name, max_model_len=None):
         super().__init__()
         self.path = os.path.join(
             project_root_path, "chinatravel", "local_llm", model_name
         )
-
-        if "Qwen3" in model_name:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.path)
-            self.llm = AutoModelForCausalLM.from_pretrained(
-                self.path,
-                torch_dtype="auto",
-                device_map="auto"
-            )
+        os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1" 
+        if "Qwen3" in model_name:    
+            self.sampling_params = SamplingParams(temperature=0.6, top_p=0.95, top_k=20, max_tokens=4096)
+            
         else:
-            self.tokenizer = AutoTokenizer.from_pretrained(self.path)
-            self.sampling_params = SamplingParams(
-                temperature=0, top_p=0.001, max_tokens=4096
-            )
-            self.llm = LLM(
-                model=self.path,
-                gpu_memory_utilization=0.95,
-            )
+            self.sampling_params = SamplingParams(temperature=0, top_p=0.001, max_tokens=4096)
+
+        if max_model_len is not None and max_model_len > 32768:
+            config = AutoConfig.from_pretrained(self.path)
+            config.rope_scaling = {
+                    "type": "yarn", 
+                    "factor": max_model_len//32768, # 2.0,  # 原长 32,768 → 扩展到 32,768 * 2 = 65536
+                    "original_max_position_embeddings": 32768
+                }
+            config.save_pretrained(self.path)
+            os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1"
+        else:
+            config = AutoConfig.from_pretrained(self.path)
+            if "rope_scaling" in config.to_dict():
+                del config.rope_scaling
+            config.save_pretrained(self.path)
+
+        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+
+        if max_model_len is None:
+            max_model_len = 32768
+            
+        self.llm = LLM(
+            model=self.path,
+            gpu_memory_utilization=0.95,
+            max_model_len=max_model_len,  # 强制上下文长度为 65536
+            # max_num_seqs = 1,           # Limit batch size
+            # tensor_parallel_size=2,     # GPUs=2
+            enable_prefix_caching=(max_model_len>=32768),  # 可选：启用前缀缓存优化长文本
+        )
+
         self.name = model_name
+        self.max_model_len = max_model_len
+
+        
 
     def _get_response(self, messages, one_line, json_mode):
         # print(messages)
+        
+        
 
         if "Qwen3" in self.name:
             text = self.tokenizer.apply_chat_template(
@@ -193,49 +254,60 @@ class Qwen(AbstractLLM):
                 add_generation_prompt=True,
                 enable_thinking=True # Switch between thinking and non-thinking modes. Default is True.
             )
-            model_inputs = self.tokenizer([text], return_tensors="pt").to(self.llm.device)
+
+            input_tokens = self.tokenizer(text)["input_ids"]
+            self.input_token_count += len(input_tokens)       
+            self.input_token_maxx = max(self.input_token_maxx, len(input_tokens))
+            
+            if len(input_tokens) >= self.max_model_len:
+                return str({"error": f"Input prompt is longer than {self.max_model_len} tokens."})
             # conduct text completion
-            generated_ids = self.llm.generate(
-                **model_inputs,
-                max_new_tokens=32768
-            )
-            output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist() 
+            outputs = self.llm.generate([text], self.sampling_params)
 
-            # parsing thinking content
-            try:
-                # rindex finding 151668 (</think>)
-                index = len(output_ids) - output_ids[::-1].index(151668)
-            except ValueError:
-                index = 0
 
-            thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-            content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
+            generated_text = outputs[0].outputs[0].text
+            # print(f"Prompt: {prompt!r}, Generated text: {generated_text!r}")
+            # print(generated_text)
 
-            # print("thinking content:", thinking_content)
-            # print("content:", content)
-            res_str = content
+            output_token_ids = outputs[0].outputs[0].token_ids
+            self.output_token_count += len(output_token_ids)
 
             try:
-                if json_mode:
-                    res_str = repair_json(res_str, ensure_ascii=False)
-                elif one_line:
-                    res_str = res_str.split("\n")[0]
+                m = re.match(r"<think>\n(.+)</think>\n\n", generated_text, flags=re.DOTALL)
+                content = generated_text[len(m.group(0)):]
+                thinking_content = m.group(1).strip()
+
             except Exception as e:
-                res_str = '{"error": "Request failed, please try again."}'
-
-
+                thinking_content = ""
+                content = generated_text.strip()
+            
+            # print("think content: ", thinking_content)
+            # print("content: ", content)
+            res_str = content
         else:
             text = self.tokenizer.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True
             )
-            try:
-                res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
-                if json_mode:
-                    res_str = repair_json(res_str, ensure_ascii=False)
-                elif one_line:
-                    res_str = res_str.split("\n")[0]
-            except Exception as e:
-                res_str = '{"error": "Request failed, please try again."}'
+            
+            input_tokens = self.tokenizer(text)["input_ids"]
+            self.input_token_count += len(input_tokens)        
+            self.input_token_maxx = max(self.input_token_maxx, len(input_tokens))
+            
+            if len(input_tokens) >= self.max_model_len:
+                return str({"error": f"Input prompt is longer than {self.max_model_len} tokens."})
+
+            outputs = self.llm.generate([text], self.sampling_params)
+            res_str = outputs[0].outputs[0].text
+
+            output_token_ids = outputs[0].outputs[0].token_ids
+            self.output_token_count += len(output_token_ids)
+        try:
+            if json_mode:
+                res_str = repair_json(res_str, ensure_ascii=False)
+            elif one_line:
+                res_str = res_str.split("\n")[0]
+        except Exception as e:
+            res_str = '{"error": "Request with specific format failed, please try again."}'
         # print("---qwen_output---")
         # print(res_str)
         # print("---qwen_output_end---")
@@ -243,73 +315,139 @@ class Qwen(AbstractLLM):
 
 
 class Mistral(AbstractLLM):
-    def __init__(self):
+    def __init__(self, max_model_len=None):
         super().__init__()
         self.path = os.path.join(
-            project_root_path,
-            "chinatravel",
-            "open_source_llm",
-            "Mistral-7B-Instruct-v0.3",
+            project_root_path, "chinatravel", "local_llm", "Mistral-7B-Instruct-v0.3",
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
         self.sampling_params = SamplingParams(
             temperature=0, top_p=0.001, max_tokens=4096
         )
+
+        if max_model_len is not None and max_model_len > 32768:
+            config = AutoConfig.from_pretrained(self.path)
+            config.rope_scaling = {
+                "type": "yarn", 
+                "factor": max_model_len // 32768,
+                "original_max_position_embeddings": 32768
+            }
+            config.save_pretrained(self.path)
+            os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1"
+        else:
+            config = AutoConfig.from_pretrained(self.path)
+            if "rope_scaling" in config.to_dict():
+                del config.rope_scaling
+            config.save_pretrained(self.path)
+
+        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+
+        if max_model_len is None:
+            max_model_len = 32768
+
         self.llm = LLM(
             model=self.path,
             gpu_memory_utilization=0.95,
+            max_model_len=max_model_len,
+            # max_num_seqs = 1,           # Limit batch size
+            # tensor_parallel_size=2,     # GPUs=2
+            enable_prefix_caching=(max_model_len>=32768),  # 可选：启用前缀缓存优化长文本
         )
-        self.name = "Mistral"
+        self.name = "Mistral-7B-Instruct-v0.3"
+        self.max_model_len = max_model_len
 
     def _get_response(self, messages, one_line, json_mode):
         messages = merge_repeated_role(messages)
         text = self.tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
         )
-        try:
-            res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
-            if json_mode:
-                res_str = repair_json(res_str, ensure_ascii=False)
-            elif one_line:
-                res_str = res_str.split("\n")[0]
-        except Exception as e:
-            res_str = '{"error": "Request failed, please try again."}'
-        # print("---mistral_output---")
-        # print(res_str)
-        # print("---mistral_output_end---")
+        
+        input_tokens = self.tokenizer(text)["input_ids"]
+        self.input_token_count += len(input_tokens)
+        self.input_token_maxx = max(self.input_token_maxx, len(input_tokens))
+
+        if len(input_tokens) >= self.max_model_len:
+            return str({"error": f"Input prompt is longer than {self.max_model_len} tokens."})
+
+        # try:
+        outputs = self.llm.generate([text], self.sampling_params)
+        res_str = outputs[0].outputs[0].text
+        
+        output_token_ids = outputs[0].outputs[0].token_ids
+        self.output_token_count += len(output_token_ids)
+        
+        if json_mode:
+            res_str = repair_json(res_str, ensure_ascii=False)
+        elif one_line:
+            res_str = res_str.split("\n")[0]
+        # except Exception as e:
+        #     print("error: ", e)
+        #     res_str = '{"error": "Request failed, please try again."}'
         return res_str
 
 
 class Llama(AbstractLLM):
-    def __init__(self):
+    def __init__(self, model_name):
         super().__init__()
-        self.path = "/lamda/shaojj/codes/TravelPlanner-main/dev/model/llama-3-chinese-8b-instruct-v3"
-        self.tokenizer = AutoTokenizer.from_pretrained(self.path)
+
+
+        Llama_supported = ["Llama3-3B", "Llama3-8B"]
+        if model_name not in Llama_supported:
+            raise ValueError(f"Unsupported model name: {model_name}. Supported models: {Llama_supported}")
+        
+        if model_name == "Llama3-3B":
+            self.path = os.path.join(
+            project_root_path, "chinatravel", "local_llm", "Llama-3.2-3B-Instruct"
+            )
+        elif model_name == "Llama3-8B":
+            self.path = os.path.join(
+            project_root_path, "chinatravel", "local_llm", "Meta-Llama-3.1-8B-Instruct"
+            )
+        
+        self.tokenizer = AutoTokenizer.from_pretrained(self.path, local_files_only=True)
         self.sampling_params = SamplingParams(
             temperature=0, top_p=0.001, max_tokens=4096
         )
-        self.llm = LLM(model=self.path)
-        self.name = "Llama"
+        self.llm = LLM(model=self.path) #, local_files_only=True)
+        self.name = model_name
 
     def _get_response(self, messages, one_line, json_mode):
         # print(messages)
         text = self.tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True
         )
+    
+        input_tokens = self.tokenizer(text)["input_ids"]
+        self.input_token_count += len(input_tokens)
+        self.input_token_maxx = max(self.input_token_maxx, len(input_tokens))
+        
+        if len(input_tokens) >= 131072:
+            return '{"error": "Input prompt is longer than 131072 tokens."}'
+        
+        
         try:
-            res_str = self.llm.generate([text], self.sampling_params)[0].outputs[0].text
+            outputs = self.llm.generate([text], self.sampling_params)
+            res_str = outputs[0].outputs[0].text
+            
+            output_token_ids = outputs[0].outputs[0].token_ids
+            self.output_token_count += len(output_token_ids)
+
             if json_mode:
                 res_str = repair_json(res_str, ensure_ascii=False)
             elif one_line:
                 res_str = res_str.split("\n")[0]
         except Exception as e:
             res_str = '{"error": "Request failed, please try again."}'
-        # print("---mistral_output---")
-        # print(res_str)
-        # print("---mistral_output_end---")
+
         print(res_str)
         return res_str
 
+class EmptyLLM(AbstractLLM):
+    def __init__(self):
+        super().__init__()
+        self.name = "EmptyLLM"
+
+    def _get_response(self, messages, one_line, json_mode):
+        return "Empty LLM response"
 
 if __name__ == "__main__":
     # model = Mistral()

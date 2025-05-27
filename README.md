@@ -5,23 +5,36 @@
 
 Official codebase for the paper "ChinaTravel: A Real-World Benchmark for Language Agents in Chinese Travel Planning".
 
-| [Webpage](https://www.lamda.nju.edu.cn/shaojj/chinatravel/) | [Paper](https://arxiv.org/abs/2412.13682) | [Dataset(Huggingface)](https://huggingface.co/datasets/LAMDA-NeSy/ChinaTravel), [Dataset(ModelScope)](https://www.modelscope.cn/datasets/Cbphcr/ChinaTravel) |
+| [Webpage](https://www.lamda.nju.edu.cn/shaojj/chinatravel/) | [Paper](https://arxiv.org/abs/2412.13682) | [Dataset(Huggingface)](https://huggingface.co/datasets/LAMDA-NeSy/ChinaTravel)|
 
 <!-- 
 ![Overview](images/overview.png) -->
 
+
+## 🏆 IJCAI 2025 Travel Planning Challenge (TPC@IJCAI)
+
+We are proud to announce that ChinaTravel has been selected as the official benchmark for the **Travel Planning Challenge (TPC) @ IJCAI 2025**! 
+
+**Official Competition Website**:  
+[https://chinatravel-competition.github.io/IJCAI2025/](https://chinatravel-competition.github.io/IJCAI2025/)
+
+Participants are invited to develop novel agents that can tackle real-world travel planning scenarios under complex constraints. This competition will showcase state-of-the-art approaches in language agent research.
+
+
 ## ChangeLog
 
+### 2025.05
+Update logs for the latest version. 
 ### 2025.04
 
-1. Added local data loaderUsers can now load custom queries locally. When specifying non-default splits_name values (e.g., "abc") in run_exp, the system will automatically load corresponding files from evaluation/default_splits/abc.txt, where the TXT file contains the target query filenames.
-2. Detailed constraints classification.See detailed docs at [Evaluation README](chinatravel/symbol_verification/readme.md)
+1. Added local data loader. Users can now load custom queries locally. When specifying non-default splits_name values (e.g., "abc") for "run_exp.py", the system will automatically load corresponding files from evaluation/default_splits/abc.txt, where the TXT file contains the target query filenames.
+2. Detailed constraints classification. See detailed docs at [Evaluation README](chinatravel/symbol_verification/readme.md)
 3. Introduced LLM-modulo baseline
    Implement the LLM-modulo pipeline with a ground-truth symbolic verifier.
    Based on methodology from:
    Paper: Robust Planning with Compound LLM Architectures: An LLM-Modulo Approach
    Codebase: https://github.com/Atharva-Gundawar/LLM-Modulo-prompts
-4. Support local LLMs inference with Qwen3-8B/4B.
+4. Support local LLMs inference with Qwen3-8B/4B. 
 
 ## Quick Start
 
@@ -39,9 +52,17 @@ pip install -r requirements.txt
 
 Download Links: [Google Drive](https://drive.google.com/file/d/1clPy2N5Q8ag0HZIOeMpffmFgWbZD8R-8/view?usp=sharing), [NJU Drive](https://box.nju.edu.cn/f/2473be4dd4164225ab7c/)
 
+3. Download the open-source LLMs (optional). 
+```bash
+bash download_llms.sh
+```
+
+### Method Overview
+
+
 ### Running
 
-We support the deepseek (offical API from deepseek), gpt-4o (chatgpt-4o-latest), glm4-plus, and local inferences with qwen (Qwen2.5-7B-Instruct).
+We support the deepseek (offical API from deepseek), gpt-4o (chatgpt-4o-latest), glm4-plus, and local inferences with Qwen (Qwen3-8B), llama, mistral (Mistral-7B-Instruct-v0.3), etc.
 
 ```bash
 export OPENAI_API_KEY=""
@@ -50,17 +71,26 @@ python run_exp.py --splits easy --agent LLMNeSy --llm deepseek --oracle_translat
 python run_exp.py --splits medium --agent LLMNeSy --llm deepseek --oracle_translation
 python run_exp.py --splits human --agent LLMNeSy --llm deepseek --oracle_translation
 
+python run_exp.py --splits human --agent LLMNeSy --llm Qwen3-8B --oracle_translation
+
 
 python run_exp.py --splits human --agent LLMNeSy --llm deepseek 
+python run_exp.py --splits human --agent LLMNeSy --llm Qwen3-8B 
+
+
+python run_exp.py --splits human --agent LLM-modulo --llm deepseek --refine_steps 10
+python run_exp.py --splits human --agent LLM-modulo --llm Qwen3-8B --refine_steps 10
 ```
 
-Note: please download the model weights to the "project_root_path/chinatravel/open_source_llm/Qwen2.5-7B-Instruct/".
 
 ### Evaluation
 
 ```bash
 python eval_exp.py --splits human --method LLMNeSy_deepseek_oracletranslation
 python eval_exp.py --splits human --method LLMNeSy_deepseek
+python eval_exp.py --splits human --method LLM-modulo_deepseek_10steps
+python eval_exp.py --splits human --method LLM-modulo_Qwen3-8B_10steps
+
 ```
 
 ## Docs

@@ -100,9 +100,6 @@ if __name__ == "__main__":
         os.makedirs("eval_res/splits_{}/".format(args.splits))
 
 
-    # print(result_data)
-    # exit(0)
-
     for method in method_list:
 
 
