@@ -95,20 +95,20 @@ python run_exp.py --splits human --agent LLM-modulo --llm Qwen3-8B --refine_step
   ```json
   {
     "hard_logic_py": [
-      '''
+      "
       total_cost=0 
       for activity in allactivities(plan):
           total_cost+=activity_cost(activity)
               total_cost += innercity_transport_cost(activity_transports(activity))
       result=(total_cost<=1000)
-      ''', 
-      '''
+      ", 
+      "
       innercity_transport_set=set()
       for activity in allactivities(plan):
           if activity_transports(activity)!=[]:                  
               innercity_transport_set.add(innercity_transport_type(activity_transports(activity)))
       result=(innercity_transport_set<={'taxi'})
-      '''
+      "
     ], 
     "hard_logic_nl": ["总预算为1800元", "市内交通选择taxi"], 
   }
