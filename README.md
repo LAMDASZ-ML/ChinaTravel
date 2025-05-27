@@ -196,6 +196,15 @@ class YourLLM(AbstractLLM):
             response = response.split("\n")[0]
         return response
 ```
+- **Add code to the init_agent function**: Open the chinatravel/agent/load_model.py file and add support for your new llm in the init_llm function. 
+```python:
+def init_llm(kwargs):
+    # ... existing code ...
+    elif llm_name == "glm4-plus":
+        llm = YourLLM()
+    # ... existing code ...
+    return llm
+```
 
 ### 3. Run Your Code Using Experiment Scripts
 After completing the above development, you can use the experiment scripts to run your code.
@@ -203,9 +212,10 @@ After completing the above development, you can use the experiment scripts to ru
 Example of running:
 
 ```bash
+python run_exp.py --splits easy --agent TPCAgent --llm TPCLLM
 python run_exp.py --splits easy --agent YourMethodName --llm YourLLMName
 ```
-The results will be saved in the `results/TPCAgent_xxx` directory.
+The results will be saved in the `results/YourMethodName_YourLLMName_xxx` directory, e.g., `results/TPCAgent_TPCLLM`.
 
 
 
