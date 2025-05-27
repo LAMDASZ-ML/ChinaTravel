@@ -1,0 +1,353 @@
+{
+    "people_number": 1,
+    "start_city": "苏州",
+    "target_city": "南京",
+    "itinerary": [
+        {
+            "day": 1,
+            "activities": [
+                {
+                    "start_time": "00:02",
+                    "end_time": "02:15",
+                    "start": "苏州站",
+                    "end": "南京站",
+                    "price": 94.54,
+                    "cost": 94.54,
+                    "tickets": 1,
+                    "transports": [],
+                    "TrainID": "T136",
+                    "type": "train"
+                },
+                {
+                    "position": "夫子庙",
+                    "type": "attraction",
+                    "price": 0,
+                    "cost": 0,
+                    "start_time": "02:37",
+                    "end_time": "04:07",
+                    "transports": [
+                        {
+                            "start": "南京站",
+                            "end": "南京站-地铁站",
+                            "mode": "walk",
+                            "start_time": "02:15",
+                            "end_time": "02:17",
+                            "cost": 0,
+                            "distance": 0.25,
+                            "price": 0
+                        },
+                        {
+                            "start": "南京站-地铁站",
+                            "end": "夫子庙-地铁站",
+                            "mode": "metro",
+                            "start_time": "02:17",
+                            "end_time": "02:31",
+                            "cost": 3,
+                            "distance": 7.25,
+                            "price": 3,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "夫子庙-地铁站",
+                            "end": "夫子庙",
+                            "mode": "walk",
+                            "start_time": "02:31",
+                            "end_time": "02:37",
+                            "cost": 0,
+                            "distance": 0.52,
+                            "price": 0
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "position": "夫子庙秦淮风光带",
+                    "type": "attraction",
+                    "price": 0,
+                    "cost": 0,
+                    "start_time": "04:07",
+                    "end_time": "05:37",
+                    "transports": [
+                        {
+                            "start": "夫子庙",
+                            "end": "夫子庙秦淮风光带",
+                            "mode": "taxi",
+                            "start_time": "04:07",
+                            "end_time": "04:07",
+                            "cost": 11.0,
+                            "distance": 0.1,
+                            "price": 11.0,
+                            "cars": 1
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "position": "明孝陵",
+                    "type": "attraction",
+                    "price": 65,
+                    "cost": 65,
+                    "start_time": "06:30",
+                    "end_time": "08:00",
+                    "transports": [
+                        {
+                            "start": "夫子庙秦淮风光带",
+                            "end": "夫子庙-地铁站",
+                            "mode": "walk",
+                            "start_time": "05:37",
+                            "end_time": "05:43",
+                            "cost": 0,
+                            "distance": 0.53,
+                            "price": 0
+                        },
+                        {
+                            "start": "夫子庙-地铁站",
+                            "end": "苜蓿园-地铁站",
+                            "mode": "metro",
+                            "start_time": "05:43",
+                            "end_time": "05:52",
+                            "cost": 3,
+                            "distance": 4.56,
+                            "price": 3,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "苜蓿园-地铁站",
+                            "end": "明孝陵",
+                            "mode": "walk",
+                            "start_time": "05:52",
+                            "end_time": "06:09",
+                            "cost": 0,
+                            "distance": 1.48,
+                            "price": 0
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "position": "南京大牌档(龙江新城市广场店)",
+                    "type": "lunch",
+                    "price": 67,
+                    "cost": 67,
+                    "start_time": "11:00",
+                    "end_time": "12:00",
+                    "transports": [
+                        {
+                            "start": "明孝陵",
+                            "end": "苜蓿园-地铁站",
+                            "mode": "walk",
+                            "start_time": "08:00",
+                            "end_time": "08:17",
+                            "cost": 0,
+                            "distance": 1.48,
+                            "price": 0
+                        },
+                        {
+                            "start": "苜蓿园-地铁站",
+                            "end": "龙江-地铁站",
+                            "mode": "metro",
+                            "start_time": "08:17",
+                            "end_time": "08:35",
+                            "cost": 4,
+                            "distance": 9.39,
+                            "price": 4,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "龙江-地铁站",
+                            "end": "南京大牌档(龙江新城市广场店)",
+                            "mode": "walk",
+                            "start_time": "08:35",
+                            "end_time": "08:38",
+                            "cost": 0,
+                            "distance": 0.32,
+                            "price": 0
+                        }
+                    ]
+                },
+                {
+                    "position": "红山森林动物园",
+                    "type": "attraction",
+                    "price": 39,
+                    "cost": 39,
+                    "start_time": "12:25",
+                    "end_time": "13:55",
+                    "transports": [
+                        {
+                            "start": "南京大牌档(龙江新城市广场店)",
+                            "end": "龙江-地铁站",
+                            "mode": "walk",
+                            "start_time": "12:00",
+                            "end_time": "12:03",
+                            "cost": 0,
+                            "distance": 0.32,
+                            "price": 0
+                        },
+                        {
+                            "start": "龙江-地铁站",
+                            "end": "迈皋桥-地铁站",
+                            "mode": "metro",
+                            "start_time": "12:03",
+                            "end_time": "12:19",
+                            "cost": 3,
+                            "distance": 8.39,
+                            "price": 3,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "迈皋桥-地铁站",
+                            "end": "红山森林动物园",
+                            "mode": "walk",
+                            "start_time": "12:19",
+                            "end_time": "12:25",
+                            "cost": 0,
+                            "distance": 0.53,
+                            "price": 0
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "position": "南京金茂威斯汀大酒店·湖影中餐厅",
+                    "type": "dinner",
+                    "price": 310,
+                    "cost": 310,
+                    "start_time": "17:00",
+                    "end_time": "18:00",
+                    "transports": [
+                        {
+                            "start": "红山森林动物园",
+                            "end": "迈皋桥-地铁站",
+                            "mode": "walk",
+                            "start_time": "13:55",
+                            "end_time": "14:01",
+                            "cost": 0,
+                            "distance": 0.53,
+                            "price": 0
+                        },
+                        {
+                            "start": "迈皋桥-地铁站",
+                            "end": "玄武门-地铁站",
+                            "mode": "metro",
+                            "start_time": "14:01",
+                            "end_time": "14:09",
+                            "cost": 3,
+                            "distance": 4.35,
+                            "price": 3,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "玄武门-地铁站",
+                            "end": "南京金茂威斯汀大酒店·湖影中餐厅",
+                            "mode": "walk",
+                            "start_time": "14:09",
+                            "end_time": "14:12",
+                            "cost": 0,
+                            "distance": 0.25,
+                            "price": 0
+                        }
+                    ]
+                },
+                {
+                    "position": "秦大士故居",
+                    "type": "attraction",
+                    "price": 4,
+                    "cost": 4,
+                    "start_time": "18:16",
+                    "end_time": "19:46",
+                    "transports": [
+                        {
+                            "start": "南京金茂威斯汀大酒店·湖影中餐厅",
+                            "end": "玄武门-地铁站",
+                            "mode": "walk",
+                            "start_time": "18:00",
+                            "end_time": "18:03",
+                            "cost": 0,
+                            "distance": 0.25,
+                            "price": 0
+                        },
+                        {
+                            "start": "玄武门-地铁站",
+                            "end": "夫子庙-地铁站",
+                            "mode": "metro",
+                            "start_time": "18:03",
+                            "end_time": "18:13",
+                            "cost": 3,
+                            "distance": 5.13,
+                            "price": 3,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "夫子庙-地铁站",
+                            "end": "秦大士故居",
+                            "mode": "walk",
+                            "start_time": "18:13",
+                            "end_time": "18:16",
+                            "cost": 0,
+                            "distance": 0.32,
+                            "price": 0
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "start_time": "21:41",
+                    "end_time": "22:53",
+                    "start": "南京南站",
+                    "end": "苏州站",
+                    "price": 122.9,
+                    "cost": 122.9,
+                    "tickets": 1,
+                    "transports": [
+                        {
+                            "start": "秦大士故居",
+                            "end": "夫子庙-地铁站",
+                            "mode": "walk",
+                            "start_time": "19:46",
+                            "end_time": "19:49",
+                            "cost": 0,
+                            "distance": 0.32,
+                            "price": 0
+                        },
+                        {
+                            "start": "夫子庙-地铁站",
+                            "end": "南京南站-地铁站",
+                            "mode": "metro",
+                            "start_time": "19:49",
+                            "end_time": "20:00",
+                            "cost": 3,
+                            "distance": 5.92,
+                            "price": 3,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "南京南站-地铁站",
+                            "end": "南京南站",
+                            "mode": "walk",
+                            "start_time": "20:00",
+                            "end_time": "20:03",
+                            "cost": 0,
+                            "distance": 0.29,
+                            "price": 0
+                        }
+                    ],
+                    "TrainID": "G7167",
+                    "type": "train"
+                }
+            ]
+        }
+    ],
+    "search_time_sec": 191.27366471290588,
+    "llm_inference_time_sec": 187.06114435195923,
+    "input_token_count": 13064,
+    "output_token_count": 2888,
+    "input_token_maxx": 2921,
+    "llm_rec_count": 13,
+    "llm_rec_format_error_count": 0,
+    "search_nodes": 2668,
+    "backtrack_count": 25,
+    "constraints_validation_count": 1,
+    "commonsense_pass_count": 1,
+    "logical_pass_count": 1,
+    "all_constraints_pass": 1
+}

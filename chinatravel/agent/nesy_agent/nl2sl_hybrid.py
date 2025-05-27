@@ -294,7 +294,7 @@ def check(hard_logic_py):
     run_error_idx = []
     example_plan = load_json_file(
         os.path.join(
-            project_path, "results/LLMNeSy_deepseek/e20241028160248698752.json"
+            project_path, "chinatravel/agent/nesy_agent/example.json"
         )
     )
     for idx, constraint in enumerate(hard_logic_py):

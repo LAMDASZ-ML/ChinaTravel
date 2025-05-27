@@ -64,6 +64,10 @@ if __name__ == "__main__":
     method = args.agent + "_" + args.llm
     if args.agent == "LLM-modulo":
         method += f"_{args.refine_steps}steps"
+
+        if not args.oracle_translation:
+            raise Exception("LLM-modulo must use oracle translation")
+
     if args.oracle_translation:
         method = method + "_oracletranslation"
     if args.preference_search:

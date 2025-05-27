@@ -21,6 +21,7 @@ We are proud to announce that ChinaTravel has been selected as the official benc
 Participants are invited to develop novel agents that can tackle real-world travel planning scenarios under complex constraints. This competition will showcase state-of-the-art approaches in language agent research.
 
 
+
 ## ChangeLog
 
 ### 2025.05
@@ -57,8 +58,11 @@ Download Links: [Google Drive](https://drive.google.com/file/d/1clPy2N5Q8ag0HZIO
 bash download_llms.sh
 ```
 
-### Method Overview
-
+4. Download the tokenizers. 
+```bash
+wget https://cdn.deepseek.com/api-docs/deepseek_v3_tokenizer.zip -P chinatravel/local_llm/
+unzip chinatravel/local_llm/deepseek_v3_tokenizer.zip -d chinatravel/local_llm/
+```
 
 ### Running
 
@@ -78,9 +82,38 @@ python run_exp.py --splits human --agent LLMNeSy --llm deepseek
 python run_exp.py --splits human --agent LLMNeSy --llm Qwen3-8B 
 
 
-python run_exp.py --splits human --agent LLM-modulo --llm deepseek --refine_steps 10
-python run_exp.py --splits human --agent LLM-modulo --llm Qwen3-8B --refine_steps 10
+python run_exp.py --splits human --agent LLM-modulo --llm deepseek --refine_steps 10 --oracle_translation
+python run_exp.py --splits human --agent LLM-modulo --llm Qwen3-8B --refine_steps 10 --oracle_translation
 ```
+
+**Note**:
+
+- The `--oracle_translation` flag enables access to annotated ground truth including:
+  - `hard_logic_py`: Executable verification DSL code
+  - `hard_logic_nl`: The corrsponding constraint descriptions
+  -  Example annotation structure:
+  ```json
+  {
+    "hard_logic_py": [
+      """
+      total_cost=0 
+      for activity in allactivities(plan):
+          total_cost+=activity_cost(activity)
+              total_cost += innercity_transport_cost(activity_transports(activity))
+      result=(total_cost<=1000)
+      """, 
+      """
+      innercity_transport_set=set()
+      for activity in allactivities(plan):
+          if activity_transports(activity)!=[]:                  
+              innercity_transport_set.add(innercity_transport_type(activity_transports(activity)))
+      result=(innercity_transport_set<={'taxi'})
+      """
+    ], 
+    "hard_logic_nl": ["总预算为1800元", "市内交通选择taxi"], 
+  }
+  ```
+- LLM-modulo method **requires** oracle_translation mode for its symbolic refinement process
 
 
 ### Evaluation
