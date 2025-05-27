@@ -144,6 +144,71 @@ python eval_tpc.py --splits tpc_phase1 --method YOUR_METHOD_NAME
 [Environment](chinatravel/environment/readme.md)
 [Constraints](chinatravel/symbol_verification/readme.md)
 
+## 🛠️ Advanced Development
+
+### 1. Develop Your Own Agent Algorithm
+To develop your own agent algorithm, you need to inherit the `BaseAgent` class from `chinatravel/agent/base.py` and add the logic for your algorithm to the `init_agent` function in `chinatravel/agent/load_model.py`. We provide an empty agent example named `TPCAgent`.
+
+Steps:
+- **Inherit the `BaseAgent` class**: Create a new Python file in the `chinatravel/agent` directory and define your own agent class, inheriting from `BaseAgent`.
+```python:chinatravel/agent/your_agent.py
+from .base import BaseAgent
+
+class YourAgent(BaseAgent):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Initialization logic
+
+    def act(self, observation):
+        # Implement the decision - making logic of the agent
+        pass
+```
+- **Add code to the init_agent function**: Open the chinatravel/agent/load_model.py file and add support for your new agent in the init_agent function.
+```python:
+def init_agent(kwargs):
+    # ... existing code ...
+    elif kwargs["method"] == "YourMethodName":
+        agent = YourAgent(
+            **kwargs
+        )
+    # ... existing code ...
+    return agent
+```
+### 2. Develop Your Own Local LLM
+To develop your own local large - language model (LLM), you need to inherit the AbstractLLM class from chinatravel/agent/llms.py and add the corresponding local LLM inference code in llms.py. We provide an empty LLM example named TPCLLM.
+Steps:
+- **Inherit the AbstractLLM class**:  Define your own LLM class in the chinatravel/agent/llms.py file, inheriting from AbstractLLM.
+```python
+class YourLLM(AbstractLLM):
+    def __init__(self):
+        super().__init__()
+        # Initialization logic
+        self.name = "YourLLMName"
+
+    def _get_response(self, messages, one_line, json_mode):
+        # Implement the response logic of the LLM
+        response = "Your LLM response"
+        if json_mode:
+            # Handle JSON mode
+            pass
+        elif one_line:
+            # Handle one - line mode
+            response = response.split("\n")[0]
+        return response
+```
+
+### 3. Run Your Code Using Experiment Scripts
+After completing the above development, you can use the experiment scripts to run your code.
+
+Example of running:
+
+```bash
+python run_exp.py --splits easy --agent YourMethodName --llm YourLLMName
+```
+The results will be saved in the `results/TPCAgent_xxx` directory.
+
+
+
 ## ✉️ Contact
 
 If you have any problems, please contact [Jie-Jing Shao](shaojj@lamda.nju.edu.cn), [Bo-Wen Zhang](221900200@smail.nju.edu.cn), [Xiao-Wen Yang](yangxw@lamda.nju.edu.cn).
@@ -162,4 +227,3 @@ If our paper or related resources prove valuable to your research, we kindly ask
       primaryClass={cs.AI},
       url={https://arxiv.org/abs/2412.13682}, 
 }
-```

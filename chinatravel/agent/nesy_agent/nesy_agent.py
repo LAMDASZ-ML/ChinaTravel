@@ -54,7 +54,7 @@ class NesyAgent(BaseAgent):
     # ):
 
     def __init__(self, **kwargs):
-        super().__init__(name="LLM-Modulo", **kwargs)
+        super().__init__(name="LLMNeSy", **kwargs)
 
         self.max_steps = kwargs.get('max_steps', 0)
 

@@ -36,7 +36,7 @@ if __name__ == "__main__":
         "-a",
         type=str,
         default=None,
-        choices=["RuleNeSy", "LLMNeSy", "LLM-modulo", "ReAct", "Act"],
+        choices=["RuleNeSy", "LLMNeSy", "LLM-modulo", "ReAct", "Act", "TPCAgent"],
     )
     parser.add_argument(
         "--llm",
@@ -119,10 +119,10 @@ if __name__ == "__main__":
         if i in white_list:
             continue
         eval_count += 1
-        symbolic_input = query_data[data_idx]
-        print(symbolic_input)
+        query_i = query_data[data_idx]
+        print(query_i)
         if args.agent in ["ReAct", "Act"]:
-            plan_log = agent(symbolic_input["nature_language"])
+            plan_log = agent(query_i["nature_language"])
             plan = plan_log["ans"]
             if isinstance(plan, str):
                 try:
@@ -136,10 +136,13 @@ if __name__ == "__main__":
             succ = 1
         elif args.agent in ["LLM-modulo"]:
             
-            succ, plan = agent.solve(symbolic_input, prob_idx=data_idx, oracle_verifier=True)
+            succ, plan = agent.solve(query_i, prob_idx=data_idx, oracle_verifier=True)
 
-        else:
-            succ, plan = agent.run(symbolic_input, load_cache=True, oralce_translation=args.oracle_translation, preference_search=args.preference_search)
+        elif args.agent in ["LLMNeSy", "RuleNeSy"]:
+            succ, plan = agent.run(query_i, load_cache=True, oralce_translation=args.oracle_translation, preference_search=args.preference_search)
+        
+        elif args.agent == "TPCAgent":
+            succ, plan = agent.run(query_i, prob_idx=data_idx, oralce_translation=args.oracle_translation)
 
         if succ:
             succ_count += 1
