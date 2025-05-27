@@ -92,7 +92,7 @@ python run_exp.py --splits human --agent LLM-modulo --llm Qwen3-8B --refine_step
   - `hard_logic_py`: Executable verification DSL code
   - `hard_logic_nl`: The corrsponding constraint descriptions
   -  Example annotation structure:
-  ```json
+  ```python
   {
     "hard_logic_py": [
       "
