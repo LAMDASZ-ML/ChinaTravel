@@ -53,7 +53,9 @@ class LLMDrivenAgent(NesyAgent):
         answer = self.backbone_llm(query_message,one_line=False)
 
         self.llm_inference_time_count += time.time() - time_before
-        
+
+        self.llm_rec_count += 1
+
         print(answer)
         match = re.search(r'IDList:\s*(\[[^\]]+\])', answer)
         # if match:
@@ -73,6 +75,8 @@ class LLMDrivenAgent(NesyAgent):
                     ranking_idx.append(selected_index)
         except Exception as e:
             print("!!!Error in eval intercity_transport_list", e)
+
+            self.llm_rec_format_error += 1
 
         # else:
             time_list = transport_info["BeginTime"].tolist()
@@ -103,6 +107,7 @@ class LLMDrivenAgent(NesyAgent):
 
         self.llm_inference_time_count += time.time() - time_before
 
+        self.llm_rec_count += 1
         print(answer)
         match = re.search(r'IDList:\s*(\[[^\]]+\])', answer)
         # if match:
@@ -124,6 +129,7 @@ class LLMDrivenAgent(NesyAgent):
                     ranking_idx.append(selected_index)
         except Exception as e:
             print("!!!Error in eval intercity_transport_list", e)
+            self.llm_rec_format_error += 1
             
         # else:
             time_list = transport_info["BeginTime"].tolist()
@@ -154,6 +160,7 @@ class LLMDrivenAgent(NesyAgent):
 
 
         self.llm_inference_time_count += time.time() - time_before
+        self.llm_rec_count += 1
 
         print(answer)
         match = re.search(r'HotelNameList:\s*\[(.*?)\]', answer, re.DOTALL)
@@ -169,6 +176,7 @@ class LLMDrivenAgent(NesyAgent):
                 ranking_idx.append(selected_index)
         except:
             print("!!!Error in eval HotelNameList")
+            self.llm_rec_format_error += 1
             
             cost_list = hotel_info["price"].tolist()
             sorted_lst = sorted(zip(range(len(hotel_info["price"])), cost_list), key=lambda x: x[1])
@@ -198,6 +206,8 @@ class LLMDrivenAgent(NesyAgent):
         query_message=[{"role": "user", "content": NEXT_POI_TYPE_INSTRUCTION.format(self.query['nature_language'], poi_plan,current_day+1, current_time, current_position,candidates_type)}]
         answer=self.backbone_llm(query_message,one_line=False)
 
+        self.llm_rec_count += 1
+
         
         self.llm_inference_time_count += time.time() - time_before
 
@@ -205,6 +215,9 @@ class LLMDrivenAgent(NesyAgent):
         match = re.search(r'Type:\s*(\w+)', answer)
         if match:
             poi_type = match.group(1)
+        else:
+            self.llm_rec_format_error += 1
+            
         if poi_type is not None and poi_type in candidates_type:
             return poi_type, candidates_type
         else:
@@ -363,6 +376,8 @@ class LLMDrivenAgent(NesyAgent):
 
 
         self.llm_inference_time_count += time.time() - time_before
+        
+        self.llm_rec_count += 1
 
         room_info_pattern = re.compile(r'RoomInfo:\s*\[\s*(\d+|\-1)\s*,\s*(\d+|\-1)\s*\]')
     
@@ -378,6 +393,8 @@ class LLMDrivenAgent(NesyAgent):
         else:
             print("!!!Error in matching RoomInfo")
             num_rooms, num_beds = None, None
+
+            self.llm_rec_format_error += 1
         
         
         # print(answer)
@@ -393,6 +410,8 @@ class LLMDrivenAgent(NesyAgent):
 
         self.llm_inference_time_count += time.time() - time_before
 
+        self.llm_rec_count += 1
+
         budget_pattern = r"Budget: (\d+)"
     
         match = re.search(budget_pattern, answer)
@@ -404,6 +423,8 @@ class LLMDrivenAgent(NesyAgent):
         else:
             print("!!!Error in extracting budget")
             budget = None
+
+            self.llm_rec_format_error += 1
         
         
         # print(answer)
@@ -422,14 +443,18 @@ class LLMDrivenAgent(NesyAgent):
 
         self.llm_inference_time_count += time.time() - time_before
 
+        self.llm_rec_count += 1
+
         match = re.search(r'TransportRanking:\s*\[(.*?)\]', answer, re.DOTALL)
         if match:
             try:
                 TransportRanking = re.findall(r'"([^"]+)"', match.group(1))
             except:
                 print("!!!Error in eval TransportRanking")
-            print('selected TransportRanking: ',TransportRanking) 
+                self.llm_rec_format_error += 1
+                TransportRanking = []
 
+            print('selected TransportRanking: ',TransportRanking) 
             rank_ = []
             for item in TransportRanking:
                 if item in ["metro", "taxi", "walk"]:

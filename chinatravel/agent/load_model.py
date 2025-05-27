@@ -54,7 +54,7 @@ def init_agent(kwargs):
         )
     elif kwargs["method"] == "LLM-modulo":
 
-        kwargs["model"] = kwargs["backbone_llm"]
+        kwargs["backbone_llm"] = kwargs["backbone_llm"]
         kwargs["max_steps"] = kwargs["refine_steps"]
         agent = LLMModuloAgent(
             **kwargs

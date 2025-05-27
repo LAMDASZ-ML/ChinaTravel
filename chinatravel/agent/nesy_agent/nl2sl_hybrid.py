@@ -207,19 +207,28 @@ For return value of activity_position(activity), it will be checked by whether t
 Also hotel_names should be checked by activity_position(activity), not accommodation_type(activity, target_city(plan)) and so for other names.
 Usually, for attractions and restaurants, if the required one exists, the requirement is satisfied. However, for accommodation, people usually stay in the same hotel for the whole trip, so we need check all the accommodation activities in the plan. Either change the function or value to make the code block correct.
 You must output the whole code block. Including those constraints that are correct.
-If you find something that really can not be transform into what we offer above, you need to output in the format below:
-[
-    "OOD!!!",
-]
-For example, if the user requires "热门景点" and any type in the list we offer above can be popular or not, you can not find a similar one in the list we offer above. You need to output "OOD!!!" in the code block.
 The original code block is:
 """
 )
 
 
+def load_example_plans(example_plans_dir="chinatravel/agent/nesy_agent/plan_for_check"):
+    plan_for_test = {}
+    plan_files = os.listdir(example_plans_dir)
+    plan_files = [plan_file for plan_file in plan_files if plan_file.endswith(".json")]
+    for file in plan_files:
+        with open(os.path.join(example_plans_dir, file), "r", encoding="utf-8") as f:
+            data = json.load(f)
+            plan_for_test[int(file.split("day")[1].split(".")[0])] = data
+    return plan_for_test
+
+
+EXAMPLE_PLANS = load_example_plans()
+
+
 def get_first_list_in_str(json_str):
     # 使用栈得到第一个合法的list
-    json_str = repair_json(json_str,ensure_ascii=False)
+    json_str = repair_json(json_str, ensure_ascii=False)
     st = 0
     # print(json_str)
     while st < len(json_str) and json_str[st] != "[":
@@ -243,14 +252,20 @@ def nl2sl_step1(query, backbone_llm):
     messages = [{"role": "user", "content": NL2SL_INSTRUCTION.format(nature_language)}]
     # print(messages[0]["content"])
     query_ = backbone_llm(messages, one_line=False, json_mode=True)
-    l_ptr = query_.find("{")
-    r_ptr = query_.rfind("}")
-    if l_ptr != -1 and r_ptr != -1:
-        query_ = query_[l_ptr : r_ptr + 1]
+    
+    try:
+        l_ptr = query_.find("{")
+        r_ptr = query_.rfind("}")
+        if l_ptr != -1 and r_ptr != -1:
+            query_ = query_[l_ptr : r_ptr + 1]
+        
+        query_ = json.loads(query_)
+        for key in query_:
+            query[key] = query_[key]
+    except Exception as e:
+        query["hard_logic"] = []
+        return query
 
-    query_ = json.loads(query_)
-    for key in query_:
-        query[key] = query_[key]
 
     return query
 
@@ -260,7 +275,9 @@ def nl2sl_step2(query, backbone_llm):
         query["hard_logic"] = [str(hl) for hl in query["hard_logic"]]
         hard_logic = "\n".join(query["hard_logic"])
     except Exception as e:
+        query["hard_logic"] = []
         query["hard_logic_py"] = []
+        return query
     messages = [
         {
             "role": "user",
@@ -289,14 +306,12 @@ def nl2sl_step2(query, backbone_llm):
     return query
 
 
-def check(hard_logic_py):
+def check(query):
     run_error_list = []
     run_error_idx = []
-    example_plan = load_json_file(
-        os.path.join(
-            project_path, "chinatravel/agent/nesy_agent/example.json"
-        )
-    )
+    hard_logic_py = query["hard_logic_py"]
+    print(query["days"])
+    example_plan = EXAMPLE_PLANS[query["days"]]
     for idx, constraint in enumerate(hard_logic_py):
         vars_dict = deepcopy(func_dict)
         vars_dict["plan"] = example_plan
@@ -312,15 +327,18 @@ def check(hard_logic_py):
                 vars_dict,
             )
         except Exception as e:
-            run_error_list.append(str(e))
-            run_error_idx.append(idx)
+            if str(e) not in [
+                "Failed to create Point instance from string: unknown format.",
+            ]:
+                run_error_list.append(str(e))
+                run_error_idx.append(idx)
     return run_error_list, run_error_idx
 
 
 def reflect_info(query, checker: HardLogicPyChecker):
     hard_logic_py = query["hard_logic_py"]
 
-    run_error_list, run_error_idx = check(hard_logic_py)
+    run_error_list, run_error_idx = check(query)
     if len(run_error_list):
         return run_error_list, run_error_idx, [], []
     value_error_list = [checker.check(constraint)[0] for constraint in hard_logic_py]
@@ -368,12 +386,15 @@ def nl2sl_step3(query, backbone_llm, checker, max_trails=5):
     value_error_idx = []
     run_error_idx = []
     while cnt < max_trails:
-        run_error_list, run_error_idx, value_error_list, value_error_idx = reflect_info(query, checker)
+        run_error_list, run_error_idx, value_error_list, value_error_idx = reflect_info(
+            query, checker
+        )
         query["reflect_info"].append(
             {
                 "cnt": cnt,
                 "run_error_list": run_error_list,
                 "value_error_list": value_error_list,
+                "hard_logic_py": query["hard_logic_py"],
             }
         )
         flag = len(run_error_list + value_error_list) == 0
@@ -382,26 +403,44 @@ def nl2sl_step3(query, backbone_llm, checker, max_trails=5):
         query, _ = reflect(query, backbone_llm, run_error_list, value_error_list)
         query["hard_logic_py"] = list(set(query["hard_logic_py"]))
 
-        if "OOD!!!" in query["hard_logic_py"]:
-            run_error_list, run_error_idx, value_error_list, value_error_idx = reflect_info(query, checker)
-            query["ood"] = True
-            ood_idx = list(set(run_error_idx + value_error_idx))
-            for idx in ood_idx:
-                query["hard_logic_py_ood"].append(query["hard_logic_py"][idx])
-            for ood_logic in query["hard_logic_py_ood"]:
-                query["hard_logic_py"].remove(ood_logic)
-            return query
+        # if "OOD!!!" in query["hard_logic_py"]:
+        #     run_error_list, run_error_idx, value_error_list, value_error_idx = (
+        #         reflect_info(query, checker)
+        #     )
+        #     query["ood"] = True
+        #     ood_idx = list(set(run_error_idx + value_error_idx))
+        #     for idx in ood_idx:
+        #         query["hard_logic_py_ood"].append(query["hard_logic_py"][idx])
+        #     for ood_logic in query["hard_logic_py_ood"]:
+        #         query["hard_logic_py"].remove(ood_logic)
+        #     return query
 
         cnt += 1
     query["reflect_cnt"] = cnt
-    run_error_list, run_error_idx, value_error_list, value_error_idx = reflect_info(query, checker)
-    ood_idx = list(set(run_error_idx + value_error_idx))
-    if len(ood_idx):
-        query["ood"] = True
-        for idx in ood_idx:
-            query["hard_logic_py_ood"].append(query["hard_logic_py"][idx])
-        for ood_logic in query["hard_logic_py_ood"]:
-            query["hard_logic_py"].remove(ood_logic)
+    run_error_list, run_error_idx, value_error_list, value_error_idx = reflect_info(
+        query, checker
+    )
+    query["reflect_info"].append(
+        {
+            "cnt": cnt,
+            "run_error_list": run_error_list,
+            "value_error_list": value_error_list,
+            "hard_logic_py": query["hard_logic_py"],
+        }
+    )
+    error_indices = set(run_error_list + value_error_list)
+    query["hard_logic_py"] = [
+        val
+        for idx, val in enumerate(query["hard_logic_py"])
+        if idx not in error_indices
+    ]
+    # ood_idx = list(set(run_error_idx + value_error_idx))
+    # if len(ood_idx):
+    #     query["ood"] = True
+    #     for idx in ood_idx:
+    #         query["hard_logic_py_ood"].append(query["hard_logic_py"][idx])
+    #     for ood_logic in query["hard_logic_py_ood"]:
+    #         query["hard_logic_py"].remove(ood_logic)
     return query
 
 
@@ -435,6 +474,7 @@ def nl2sl(query, backbone_llm, checker, cache_dir="cache_hybrid"):
     query = nl2sl_step1(query, backbone_llm)
     query = nl2sl_step2(query, backbone_llm)
     query = nl2sl_step3(query, backbone_llm, checker)
+
     save_json_file(query, file_path)
     return query
 
@@ -461,6 +501,8 @@ def nl2sl_reflect(query, backbone_llm):
     query = nl2sl_step1(query, backbone_llm)
     query = nl2sl_step2(query, backbone_llm)
     query = nl2sl_step3(query, backbone_llm, checker)
+    query["hard_logic_py_iter_3"] = query["hard_logic_py"] 
+
     return query
 
 
@@ -525,7 +567,7 @@ def run(splits: str = "easy_day1", backbone_llm=None, need_check=False):
         checker = HardLogicPyChecker(query["target_city"])
         query = nl2sl(query, backbone_llm, checker, cache_dir=cache_root)
         if need_check:
-            if not len(check(query["hard_logic_py"])[0]):
+            if not len(check(query)[0]):
                 print("Run Error in query: ", query["uid"])
 
 

@@ -117,8 +117,12 @@ class RuleDrivenAgent(NesyAgent):
                         current_time,
                         transport_type_sel,
                     )
-
-                    arrived_time = transports_sel[-1]["end_time"]
+                    if not isinstance(transports_sel, list):
+                            continue
+                    if len(transports_sel) == 0:
+                        arrived_time = current_time
+                    else:
+                        arrived_time = transports_sel[-1]["end_time"]
 
                     if not time_compare_if_earlier_equal(
                         poi_plan["back_transport"]["BeginTime"], arrived_time
@@ -152,7 +156,12 @@ class RuleDrivenAgent(NesyAgent):
                         )
 
                         flag = True
-                        arrived_time = transports_sel[-1]["end_time"]
+                        if not isinstance(transports_sel, list):
+                            continue
+                        if len(transports_sel) == 0:
+                            arrived_time = current_time
+                        else:
+                            arrived_time = transports_sel[-1]["end_time"]
                         if not time_compare_if_earlier_equal("24:00", arrived_time):
                             flag = False
                     if flag:
@@ -262,7 +271,10 @@ class RuleDrivenAgent(NesyAgent):
                 current_time,
                 "walk",
             )
-            attr_dist.append(transports_sel[0]["distance"])
+            if len(transports_sel) == 0:
+                attr_dist.append(0)
+            else:
+                attr_dist.append(transports_sel[0]["distance"])
         # print(attr_dist)
 
         ranking_idx = np.argsort(np.array(attr_dist))
@@ -305,7 +317,10 @@ class RuleDrivenAgent(NesyAgent):
                 current_time,
                 "walk",
             )
-            attr_dist.append(transports_sel[0]["distance"])
+            if len(transports_sel) == 0:
+                attr_dist.append(0)
+            else:            
+                attr_dist.append(transports_sel[0]["distance"])
 
         ranking_dist = np.argsort(np.array(attr_dist))
 

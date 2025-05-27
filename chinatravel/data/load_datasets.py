@@ -63,6 +63,14 @@ def load_query_local(args, version="", verbose=False):
                         open(os.path.join(dir_ii, file_i), encoding="utf-8")
                     )
 
+                    if hasattr(args, 'oracle_translation') and not args.oracle_translation:
+                        if "hard_logic" in data_i:
+                            del data_i["hard_logic"]
+                        if "hard_logic_py" in data_i:
+                            del data_i["hard_logic_py"]
+                        if "hard_logic_nl" in data_i:
+                            del data_i["hard_logic_nl"]
+
                     query_data[query_id] = data_i
 
     # print(query_data)
@@ -95,10 +103,20 @@ def load_query(args):
 
     for data_i in query_data:
         data_i["hard_logic_py"] = ast.literal_eval(data_i["hard_logic_py"])
+
+
     
     query_id_list = [data_i["uid"] for data_i in query_data]
     data_dict = {}
     for data_i in query_data:
+        if not args.oracle_translation:
+            if "hard_logic" in data_i:
+                del data_i["hard_logic"]
+            if "hard_logic_py" in data_i:
+                del data_i["hard_logic_py"]
+            if "hard_logic_nl" in data_i:
+                del data_i["hard_logic_nl"]
+
         data_dict[data_i["uid"]] = data_i
 
     return query_id_list, data_dict

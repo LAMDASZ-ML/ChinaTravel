@@ -120,22 +120,23 @@ class BaseAgent:
     def __init__(self, name, **kwargs):
         self.name = name
 
+        self.env = kwargs.get('env', None)
+
         self.log_dir = kwargs.get('log_dir', "logs")
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
             print(f"Created log directory: {self.log_dir}")
 
-        self.model = kwargs.get('model', None)
-        if type(self.model) == str:
-            self.backbone_llm = init_llm(self.model)
+        
+        model = kwargs.get('backbone_llm', None)
+        if type(model) == str:
+            self.backbone_llm = init_llm(model)
         else:
-            self.backbone_llm = self.model
-
+            self.backbone_llm = model
         self.model_name = self.backbone_llm.name
 
         
         self.llm_inference_time_count = 0
-        
         self.start_clock = 0
 
     def reset_clock(self):

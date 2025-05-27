@@ -1,0 +1,446 @@
+{
+    "people_number": 1,
+    "start_city": "广州",
+    "target_city": "北京",
+    "itinerary": [
+        {
+            "day": 1,
+            "activities": [
+                {
+                    "start_time": "08:25",
+                    "end_time": "16:27",
+                    "start": "广州南站",
+                    "end": "北京西站",
+                    "price": 1227.58,
+                    "cost": 1227.58,
+                    "tickets": 1,
+                    "transports": [],
+                    "TrainID": "G82",
+                    "type": "train"
+                },
+                {
+                    "position": "The Lotus Garden 莲花园",
+                    "type": "dinner",
+                    "price": 238,
+                    "cost": 238,
+                    "start_time": "17:34",
+                    "end_time": "18:34",
+                    "transports": [
+                        {
+                            "start": "北京西站",
+                            "end": "北京西站-地铁站",
+                            "mode": "walk",
+                            "start_time": "16:27",
+                            "end_time": "16:27",
+                            "cost": 0,
+                            "distance": 0.08,
+                            "price": 0
+                        },
+                        {
+                            "start": "北京西站-地铁站",
+                            "end": "环球度假区-地铁站",
+                            "mode": "metro",
+                            "start_time": "16:27",
+                            "end_time": "17:29",
+                            "cost": 7,
+                            "distance": 31.03,
+                            "price": 7,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "环球度假区-地铁站",
+                            "end": "The Lotus Garden 莲花园",
+                            "mode": "walk",
+                            "start_time": "17:29",
+                            "end_time": "17:34",
+                            "cost": 0,
+                            "distance": 0.5,
+                            "price": 0
+                        }
+                    ]
+                },
+                {
+                    "position": "SOLANA蓝色港湾",
+                    "type": "attraction",
+                    "price": 0,
+                    "cost": 0,
+                    "start_time": "19:24",
+                    "end_time": "20:54",
+                    "transports": [
+                        {
+                            "start": "The Lotus Garden 莲花园",
+                            "end": "环球度假区-地铁站",
+                            "mode": "walk",
+                            "start_time": "18:34",
+                            "end_time": "18:39",
+                            "cost": 0,
+                            "distance": 0.5,
+                            "price": 0
+                        },
+                        {
+                            "start": "环球度假区-地铁站",
+                            "end": "东风北桥-地铁站",
+                            "mode": "metro",
+                            "start_time": "18:39",
+                            "end_time": "19:19",
+                            "cost": 5,
+                            "distance": 20.49,
+                            "price": 5,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "东风北桥-地铁站",
+                            "end": "SOLANA蓝色港湾",
+                            "mode": "walk",
+                            "start_time": "19:19",
+                            "end_time": "19:24",
+                            "cost": 0,
+                            "distance": 0.47,
+                            "price": 0
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "position": "秋果S酒店(北京首都机场二店)",
+                    "type": "accommodation",
+                    "price": 319,
+                    "cost": 319,
+                    "start_time": "21:54",
+                    "end_time": "24:00",
+                    "transports": [
+                        {
+                            "start": "SOLANA蓝色港湾",
+                            "end": "东风北桥-地铁站",
+                            "mode": "walk",
+                            "start_time": "20:54",
+                            "end_time": "20:59",
+                            "cost": 0,
+                            "distance": 0.47,
+                            "price": 0
+                        },
+                        {
+                            "start": "东风北桥-地铁站",
+                            "end": "2号航站楼-地铁站",
+                            "mode": "metro",
+                            "start_time": "20:59",
+                            "end_time": "21:31",
+                            "cost": 5,
+                            "distance": 16.24,
+                            "price": 5,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "2号航站楼-地铁站",
+                            "end": "秋果S酒店(北京首都机场二店)",
+                            "mode": "walk",
+                            "start_time": "21:31",
+                            "end_time": "21:54",
+                            "cost": 0,
+                            "distance": 1.96,
+                            "price": 0
+                        }
+                    ],
+                    "room_type": 1,
+                    "rooms": 1
+                }
+            ]
+        },
+        {
+            "day": 2,
+            "activities": [
+                {
+                    "position": "秋果S酒店(北京首都机场二店)",
+                    "type": "breakfast",
+                    "price": 0,
+                    "cost": 0,
+                    "start_time": "08:00",
+                    "end_time": "08:30",
+                    "transports": []
+                },
+                {
+                    "position": "囍凤楼·臻选(北京环球城市大道店)",
+                    "type": "lunch",
+                    "price": 95,
+                    "cost": 95,
+                    "start_time": "11:00",
+                    "end_time": "12:00",
+                    "transports": [
+                        {
+                            "start": "秋果S酒店(北京首都机场二店)",
+                            "end": "2号航站楼-地铁站",
+                            "mode": "walk",
+                            "start_time": "08:30",
+                            "end_time": "08:53",
+                            "cost": 0,
+                            "distance": 1.96,
+                            "price": 0
+                        },
+                        {
+                            "start": "2号航站楼-地铁站",
+                            "end": "环球度假区-地铁站",
+                            "mode": "metro",
+                            "start_time": "08:53",
+                            "end_time": "09:46",
+                            "cost": 6,
+                            "distance": 26.6,
+                            "price": 6,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "环球度假区-地铁站",
+                            "end": "囍凤楼·臻选(北京环球城市大道店)",
+                            "mode": "walk",
+                            "start_time": "09:46",
+                            "end_time": "09:49",
+                            "cost": 0,
+                            "distance": 0.3,
+                            "price": 0
+                        }
+                    ]
+                },
+                {
+                    "position": "北京坊",
+                    "type": "attraction",
+                    "price": 0,
+                    "cost": 0,
+                    "start_time": "12:56",
+                    "end_time": "14:26",
+                    "transports": [
+                        {
+                            "start": "囍凤楼·臻选(北京环球城市大道店)",
+                            "end": "环球度假区-地铁站",
+                            "mode": "walk",
+                            "start_time": "12:00",
+                            "end_time": "12:03",
+                            "cost": 0,
+                            "distance": 0.3,
+                            "price": 0
+                        },
+                        {
+                            "start": "环球度假区-地铁站",
+                            "end": "天安门东-地铁站",
+                            "mode": "metro",
+                            "start_time": "12:03",
+                            "end_time": "12:52",
+                            "cost": 6,
+                            "distance": 24.65,
+                            "price": 6,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "天安门东-地铁站",
+                            "end": "北京坊",
+                            "mode": "walk",
+                            "start_time": "12:52",
+                            "end_time": "12:56",
+                            "cost": 0,
+                            "distance": 0.4,
+                            "price": 0
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "position": "Berry Beans(前门店)",
+                    "type": "dinner",
+                    "price": 66,
+                    "cost": 66,
+                    "start_time": "17:00",
+                    "end_time": "18:00",
+                    "transports": [
+                        {
+                            "start": "北京坊",
+                            "end": "天安门东-地铁站",
+                            "mode": "walk",
+                            "start_time": "14:26",
+                            "end_time": "14:30",
+                            "cost": 0,
+                            "distance": 0.4,
+                            "price": 0
+                        },
+                        {
+                            "start": "天安门东-地铁站",
+                            "end": "珠市口-地铁站",
+                            "mode": "metro",
+                            "start_time": "14:30",
+                            "end_time": "14:33",
+                            "cost": 2,
+                            "distance": 1.84,
+                            "price": 2,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "珠市口-地铁站",
+                            "end": "Berry Beans(前门店)",
+                            "mode": "walk",
+                            "start_time": "14:33",
+                            "end_time": "14:40",
+                            "cost": 0,
+                            "distance": 0.62,
+                            "price": 0
+                        }
+                    ]
+                },
+                {
+                    "position": "世贸天阶",
+                    "type": "attraction",
+                    "price": 0,
+                    "cost": 0,
+                    "start_time": "18:22",
+                    "end_time": "19:52",
+                    "transports": [
+                        {
+                            "start": "Berry Beans(前门店)",
+                            "end": "珠市口-地铁站",
+                            "mode": "walk",
+                            "start_time": "18:00",
+                            "end_time": "18:07",
+                            "cost": 0,
+                            "distance": 0.62,
+                            "price": 0
+                        },
+                        {
+                            "start": "珠市口-地铁站",
+                            "end": "呼家楼-地铁站",
+                            "mode": "metro",
+                            "start_time": "18:07",
+                            "end_time": "18:19",
+                            "cost": 3,
+                            "distance": 6.47,
+                            "price": 3,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "呼家楼-地铁站",
+                            "end": "世贸天阶",
+                            "mode": "walk",
+                            "start_time": "18:19",
+                            "end_time": "18:22",
+                            "cost": 0,
+                            "distance": 0.29,
+                            "price": 0
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "position": "罗红摄影艺术馆",
+                    "type": "attraction",
+                    "price": 0,
+                    "cost": 0,
+                    "start_time": "20:18",
+                    "end_time": "21:00",
+                    "transports": [
+                        {
+                            "start": "世贸天阶",
+                            "end": "罗红摄影艺术馆",
+                            "mode": "taxi",
+                            "start_time": "19:52",
+                            "end_time": "20:18",
+                            "cost": 73.54,
+                            "distance": 17.52,
+                            "price": 73.54,
+                            "cars": 1
+                        }
+                    ],
+                    "tickets": 1
+                },
+                {
+                    "position": "秋果S酒店(北京首都机场二店)",
+                    "type": "accommodation",
+                    "price": 319,
+                    "cost": 319,
+                    "start_time": "22:05",
+                    "end_time": "24:00",
+                    "transports": [
+                        {
+                            "start": "罗红摄影艺术馆",
+                            "end": "3号航站楼-地铁站",
+                            "mode": "walk",
+                            "start_time": "21:00",
+                            "end_time": "21:35",
+                            "cost": 0,
+                            "distance": 2.99,
+                            "price": 0
+                        },
+                        {
+                            "start": "3号航站楼-地铁站",
+                            "end": "2号航站楼-地铁站",
+                            "mode": "metro",
+                            "start_time": "21:35",
+                            "end_time": "21:42",
+                            "cost": 2,
+                            "distance": 3.54,
+                            "price": 2,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "2号航站楼-地铁站",
+                            "end": "秋果S酒店(北京首都机场二店)",
+                            "mode": "walk",
+                            "start_time": "21:42",
+                            "end_time": "22:05",
+                            "cost": 0,
+                            "distance": 1.96,
+                            "price": 0
+                        }
+                    ],
+                    "room_type": 1,
+                    "rooms": 1
+                }
+            ]
+        },
+        {
+            "day": 3,
+            "activities": [
+                {
+                    "start_time": "13:10",
+                    "end_time": "23:09",
+                    "start": "北京西站",
+                    "end": "广州南站",
+                    "price": 1227.58,
+                    "cost": 1227.58,
+                    "tickets": 1,
+                    "transports": [
+                        {
+                            "start": "秋果S酒店(北京首都机场二店)",
+                            "end": "2号航站楼-地铁站",
+                            "mode": "walk",
+                            "start_time": "00:00",
+                            "end_time": "00:23",
+                            "cost": 0,
+                            "distance": 1.96,
+                            "price": 0
+                        },
+                        {
+                            "start": "2号航站楼-地铁站",
+                            "end": "北京西站-地铁站",
+                            "mode": "metro",
+                            "start_time": "00:23",
+                            "end_time": "01:24",
+                            "cost": 7,
+                            "distance": 30.96,
+                            "price": 7,
+                            "tickets": 1
+                        },
+                        {
+                            "start": "北京西站-地铁站",
+                            "end": "北京西站",
+                            "mode": "walk",
+                            "start_time": "01:24",
+                            "end_time": "01:24",
+                            "cost": 0,
+                            "distance": 0.08,
+                            "price": 0
+                        }
+                    ],
+                    "TrainID": "G339",
+                    "type": "train"
+                }
+            ]
+        }
+    ],
+    "search_time_sec": 281.1349265575409,
+    "llm_inference_time_sec": 187.5164806842804
+}
