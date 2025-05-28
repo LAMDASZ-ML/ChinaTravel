@@ -10,9 +10,8 @@ Official codebase for the paper "ChinaTravel: A Real-World Benchmark for Languag
 [![Webpage](https://img.shields.io/badge/Webpage-Visit-blue)](https://www.lamda.nju.edu.cn/shaojj/chinatravel/)
 [![Paper](https://img.shields.io/badge/Paper-View-red)](https://arxiv.org/abs/2412.13682)
 [![Dataset(Huggingface)](https://img.shields.io/badge/Dataset-Huggingface-yellow)](https://huggingface.co/datasets/LAMDA-NeSy/ChinaTravel)
-[![Competition(TPC@2025)](https://img.shields.io/badge/IJCAI%20Competition-TPC@2025-green)](https://chinatravel-competition.github.io/IJCAI2025/)
-
-
+[![Competition(TPC@IJCAI2025)](https://img.shields.io/badge/IJCAI%20Competition-TPC@IJCAI2025-green)](https://chinatravel-competition.github.io/IJCAI2025/)
+[![Competition(TPC@AIC2025)](https://img.shields.io/badge/AIC%20Competition-TPC@AIC2025-green)](TPC@AIC2025/readme.md)
 
 
 <!-- 
