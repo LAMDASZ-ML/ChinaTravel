@@ -227,7 +227,7 @@ After completing the above development, you can use the experiment scripts to ru
 Example of running:
 
 ```bash
-python run_exp.py --splits easy --agent TPCAgent --llm TPCLLM
+python run_tpc.py --splits easy --agent TPCAgent --llm TPCLLM
 python run_exp.py --splits easy --agent YourMethodName --llm YourLLMName
 ```
 

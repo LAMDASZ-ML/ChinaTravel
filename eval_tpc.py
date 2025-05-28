@@ -24,19 +24,6 @@ from chinatravel.evaluation.preference import evaluate_preference, evaluate_pref
 
 
 
-METHOD_LIST = [
-    "example" "act_Deepseek_zeroshot",
-    "act_GPT4o_zeroshot",
-    "react_Deepseek_zeroshot",
-    "react_GPT4o_zeroshot",
-    "react_GLM4Plus_zeroshot",
-    "react_Deepseek_oneshot",
-    "react_GPT4o_oneshot",
-    "naive_ns_Deepseek",
-    "naive_ns_GPT4o",
-    "naive_ns_GLM4Plus",
-]
-
 DEFAULT_ATTRACTION_PR="""
 attraction_count = 0
 for activity in allactivities(plan):
@@ -72,16 +59,6 @@ DEFAULT_PR=[
 ]
 
 METHOD_LIST = [
-    "example" "act_Deepseek_zeroshot",
-    "act_GPT4o_zeroshot",
-    "react_Deepseek_zeroshot",
-    "react_GPT4o_zeroshot",
-    "react_GLM4Plus_zeroshot",
-    "react_Deepseek_oneshot",
-    "react_GPT4o_oneshot",
-    "naive_ns_Deepseek",
-    "naive_ns_GPT4o",
-    "naive_ns_GLM4Plus",
 ]
 
 from tqdm import tqdm
@@ -123,6 +100,8 @@ def cal_default_pr_score(query_index, query_data, result_data,all_pass_id):
             except Exception as e:
                 results.append(0.)
         all_score.append(np.array(results))
+    if len(all_score)==0:
+        return np.zeros(len(DEFAULT_PR))
     print(np.mean(all_score,axis=0))
     return np.mean(all_score,axis=0)
 
@@ -185,14 +164,6 @@ if __name__ == "__main__":
     schema = load_json_file(schema_file_path)
 
 
-    # if not os.path.exists("eval_res/"):
-    #     os.makedirs("eval_res/")
-    # if not os.path.exists("eval_res/splits_{}/".format(args.splits)):
-    #     os.makedirs("eval_res/splits_{}/".format(args.splits))
-
-
-    # print(result_data)
-    # exit(0)
     scores = {}
     for method in method_list:
 

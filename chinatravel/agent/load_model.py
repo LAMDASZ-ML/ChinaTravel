@@ -12,6 +12,8 @@ def init_agent(kwargs):
 
     from .nesy_verifier import LLMModuloAgent
 
+    from .tpc_agent.tpc_agent import TPCAgent
+
     if kwargs["method"] == "RuleNeSy":
         agent = RuleDrivenAgent(
             env=kwargs["env"],
@@ -55,6 +57,10 @@ def init_agent(kwargs):
         agent = LLMModuloAgent(
             **kwargs
         )
+    elif kwargs["method"] == "TPCAgent":
+        agent = TPCAgent(
+            **kwargs
+        )
     else:
         raise Exception("Not Implemented")
     return agent
@@ -62,6 +68,8 @@ def init_agent(kwargs):
 
 def init_llm(llm_name, max_model_len=None,extend65536=False):
     from .llms import Deepseek, GPT4o, GLM4Plus, Qwen, Mistral, Llama, EmptyLLM
+
+    from .tpc_agent.tpc_llm import TPCLLM
 
     if llm_name == "deepseek":
         llm = Deepseek()
@@ -77,6 +85,8 @@ def init_llm(llm_name, max_model_len=None,extend65536=False):
         llm = Llama(llm_name)
     elif llm_name == "rule":
         return EmptyLLM()
+    elif llm_name == "TPCLLM":
+        llm = TPCLLM()
     else:
         raise Exception("Not Implemented")
 
