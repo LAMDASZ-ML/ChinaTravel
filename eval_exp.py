@@ -98,11 +98,18 @@ if __name__ == "__main__":
         os.makedirs("eval_res/")
     if not os.path.exists("eval_res/splits_{}/".format(args.splits)):
         os.makedirs("eval_res/splits_{}/".format(args.splits))
-
+    
+    fail_list = []
 
     for method in method_list:
 
+        print("method: ", method)
 
+        plan_count = 0
+        for plan in result_data[method]:
+            if plan != {}:
+                plan_count += 1
+        print("There are {} results...".format(plan_count))
 
 
         print("Method: {}".format(method))
@@ -117,6 +124,13 @@ if __name__ == "__main__":
         schema_result_agg.to_csv(res_file, index=False)
         print("save to {}".format(res_file))
         print("Schema Pass Rate:", schema_rate)
+
+        for idx in query_index:
+            if idx not in schema_pass_id:
+                fail_list.append(idx)
+        with open(f"{args.splits}_{args.method}_schema_fail.txt", "w") as f:
+            for uid in fail_list:
+                f.writelines(uid + "\n")
 
         macro_comm, micro_comm, common_result_agg, commonsense_pass_id = evaluate_commonsense_constraints(
             query_index, query_data, result_data[method], verbose=False
@@ -134,6 +148,10 @@ if __name__ == "__main__":
         #     if passid not in commonsense_pass_id:
         #         print("schema pass but commonsense fail: {}".format(passid))
         #         # print(result_data[method][passid])
+        for passid in commonsense_pass_id:
+            if passid not in schema_pass_id:
+                print("commonsense pass but schema fail: {}".format(passid))
+                # print(result_data[method][passid])
 
         # print("Logical constraints (flat version):")
         # macro_logi, micro_logi, logi_result_agg, logi_pass_id_flat = evaluate_hard_constraints(

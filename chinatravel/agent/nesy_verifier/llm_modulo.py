@@ -114,6 +114,9 @@ class LLMModuloAgent(BaseAgent):
         if info == "No solution":
             return info
 
+        if not isinstance(info, list):
+            return "No solution"
+        
         if len(info) == 3:
             info[1]["price"] = info[1]["cost"]
             info[1]["tickets"] = self.problem["people_number"]
@@ -151,6 +154,13 @@ class LLMModuloAgent(BaseAgent):
     
 
         self.problem = problem
+
+        self.backbone_llm.input_token_count = 0
+        self.backbone_llm.output_token_count = 0
+        
+        self.backbone_llm.input_token_maxx = 0
+
+
         self.llm_inference_time = 0
         self.information_collection_time = 0
         self.memory = {}
@@ -317,6 +327,9 @@ class LLMModuloAgent(BaseAgent):
             "itinerary": json_plan, 
             
             "elapsed_time(sec)": time.time() - self.start_clock, 
+            "input_token_count": self.backbone_llm.input_token_count,
+            "output_token_count": self.backbone_llm.output_token_count,
+            "input_token_maxx": self.backbone_llm.input_token_maxx,
             "llm_inference_time(sec)": self.llm_inference_time, 
             "information_collection_time": self.information_collection_time, 
         }
@@ -327,11 +340,17 @@ class LLMModuloAgent(BaseAgent):
         error_info = collect_commonsense_constraints_error(problem, evaluated_plan, verbose=False)
 
         if not "Format Error. Please strictly follow the instructions in the prompt." in error_info:
-            evaluated_plan['itinerary'] = self.translate_innercity_transport(evaluated_plan['itinerary'], problem)
-            personal_error_info = collect_personal_error(problem, evaluated_plan, verbose=False)
 
-            for pe in personal_error_info:
-                error_info.append(pe)
+            try:
+                evaluated_plan['itinerary'] = self.translate_innercity_transport(evaluated_plan['itinerary'], problem)
+                personal_error_info = collect_personal_error(problem, evaluated_plan, verbose=False)
+
+                for pe in personal_error_info:
+                    error_info.append(pe)
+            except Exception as e:
+                print("Error in translating innercity transport: ", e)
+                error_info.append("Format Error on Innercity Transport Information. Please strictly follow the instructions in the prompt.")
+
         
         print("ITER: ", 0, "ERROR:\n", error_info)
 
@@ -343,8 +362,9 @@ class LLMModuloAgent(BaseAgent):
         with open(json_file, 'w', encoding='utf-8') as f:
             json.dump(evaluated_plan, f, indent=4, ensure_ascii=False)
 
+        unique_error_info = list(set(error_info))
         error_info_nl = ""
-        for item in error_info:
+        for item in unique_error_info:
             error_info_nl += item + "\n"
         
         error_file = os.path.join(self.log_dir, f'problem_{prob_idx}_step_0_error.err')
@@ -384,6 +404,7 @@ class LLMModuloAgent(BaseAgent):
             response = """[{"day": 1,""" + response
             
             self.llm_inference_time += time.time() - pre_time
+
             nl_plan = repair_json(response)
             json_plan = json.loads(nl_plan)
 
@@ -396,18 +417,27 @@ class LLMModuloAgent(BaseAgent):
                 "itinerary": json_plan, 
                 
                 "elapsed_time(sec)": time.time() - self.start_clock, 
+                "input_token_count": self.backbone_llm.input_token_count,
+                "output_token_count": self.backbone_llm.output_token_count,
+                "input_token_maxx": self.backbone_llm.input_token_maxx,
                 "llm_inference_time(sec)": self.llm_inference_time, 
                 "information_collection_time": self.information_collection_time, 
             }
             error_info = collect_commonsense_constraints_error(problem, evaluated_plan, verbose=False)       
 
             if not "Format Error. Please strictly follow the instructions in the prompt." in error_info:
-                evaluated_plan['itinerary'] = self.translate_innercity_transport(evaluated_plan['itinerary'], problem)
-                personal_error_info = collect_personal_error(problem, evaluated_plan, verbose=False)
+                try:
+                    evaluated_plan['itinerary'] = self.translate_innercity_transport(evaluated_plan['itinerary'], problem)
+                    personal_error_info = collect_personal_error(problem, evaluated_plan, verbose=False)
                 
-                for pe in personal_error_info:
-                    error_info.append(pe)
-            
+                    for pe in personal_error_info:
+                        error_info.append(pe)
+                
+                except Exception as e:
+                    print("Error in translating innercity transport: ", e)
+                    error_info.append("Format Error on Innercity Transport Information. Please strictly follow the instructions in the prompt.")
+
+
             print("ITER: ", step_i, "ERROR:\n", error_info)
             
             evaluated_plan["error_info"] = error_info
@@ -553,7 +583,7 @@ class LLMModuloAgent(BaseAgent):
         flight_info_str = flight_info.to_csv(sep='\t', na_rep='nan', index=False)
         time_before = time.time()
 
-        query_message=[{"role": "user", "content": TRANSPORT_GO_SELECTION_INSTRUCTION.format(required_options=required_num, user_requirements=query["nature_language"], train_info=train_info_str, flight_info=flight_info_str)}]
+        query_message=[{"role": "user", "content": TRANSPORT_GO_SELECTION_INSTRUCTION.format(origin=query["start_city"], destination=query["target_city"], required_options=required_num, user_requirements=query["nature_language"], train_info=train_info_str, flight_info=flight_info_str)}]
         answer = self.backbone_llm(query_message,one_line=False)
         print(answer)
 
@@ -589,7 +619,7 @@ class LLMModuloAgent(BaseAgent):
         train_info_str = train_info.to_csv(sep='\t', na_rep='nan', index=False)
         flight_info_str = flight_info.to_csv(sep='\t', na_rep='nan', index=False)
         time_before = time.time()
-        query_message=[{"role": "user", "content": TRANSPORT_BACK_SELECTION_INSTRUCTION.format(required_options=required_num, user_requirements=query["nature_language"], train_info=train_info_str, flight_info=flight_info_str)}]
+        query_message=[{"role": "user", "content": TRANSPORT_BACK_SELECTION_INSTRUCTION.format(origin=query["target_city"], destination=query["start_city"], required_options=required_num, user_requirements=query["nature_language"], train_info=train_info_str, flight_info=flight_info_str)}]
         answer = self.backbone_llm(query_message,one_line=False)
         print(answer)
         selected_train_idx, selected_flight_idx = [], []

@@ -449,14 +449,6 @@ class EmptyLLM(AbstractLLM):
     def _get_response(self, messages, one_line, json_mode):
         return "Empty LLM response"
 
-class TPCLLM(AbstractLLM):
-    def __init__(self):
-        super().__init__()
-        self.name = "EmptyLLM"
-
-    def _get_response(self, messages, one_line, json_mode):
-        return "Empty LLM response"
-
 if __name__ == "__main__":
     # model = Mistral()
     model = GPT4o()

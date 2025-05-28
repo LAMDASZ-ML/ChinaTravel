@@ -1,5 +1,4 @@
 def init_agent(kwargs):
-    from .base import BaseAgent
     from .nesy_agent.rule_driven_rec import RuleDrivenAgent
     from .nesy_agent.llm_driven_rec import LLMDrivenAgent
     from .pure_neuro_agent.pure_neuro_agent import ActAgent, ReActAgent
@@ -12,7 +11,6 @@ def init_agent(kwargs):
     )
 
     from .nesy_verifier import LLMModuloAgent
-    from .tpc_agent.tpc_agent import TPCAgent
 
     if kwargs["method"] == "RuleNeSy":
         agent = RuleDrivenAgent(
@@ -23,10 +21,7 @@ def init_agent(kwargs):
         )
     elif kwargs["method"] == "LLMNeSy":
         agent = LLMDrivenAgent(
-            env=kwargs["env"],
-            backbone_llm=kwargs["backbone_llm"],
-            cache_dir=kwargs["cache_dir"],
-            debug=kwargs["debug"],
+            **kwargs
         )
     elif kwargs["method"] == "Act":
         agent = ActAgent(
@@ -55,15 +50,9 @@ def init_agent(kwargs):
             ),
         )
     elif kwargs["method"] == "LLM-modulo":
-
-        kwargs["backbone_llm"] = kwargs["backbone_llm"]
+        kwargs["model"] = kwargs["backbone_llm"]
         kwargs["max_steps"] = kwargs["refine_steps"]
         agent = LLMModuloAgent(
-            **kwargs
-        )
-    elif kwargs["method"] == "TPCAgent":
-
-        agent = TPCAgent(
             **kwargs
         )
     else:
@@ -71,8 +60,8 @@ def init_agent(kwargs):
     return agent
 
 
-def init_llm(llm_name):
-    from .llms import Deepseek, GPT4o, GLM4Plus, Qwen, Mistral, Llama, TPCLLM
+def init_llm(llm_name, max_model_len=None,extend65536=False):
+    from .llms import Deepseek, GPT4o, GLM4Plus, Qwen, Mistral, Llama, EmptyLLM
 
     if llm_name == "deepseek":
         llm = Deepseek()
@@ -81,13 +70,13 @@ def init_llm(llm_name):
     elif llm_name == "glm4-plus":
         llm = GLM4Plus()
     elif "Qwen" in llm_name:
-        llm = Qwen(llm_name)
+        llm = Qwen(llm_name, max_model_len=max_model_len)
     elif llm_name == "mistral":
-        llm = Mistral()
-    elif llm_name == "llama":
-        llm = Llama()
-    elif llm_name == "TPCLLM":
-        llm = TPCLLM()
+        llm = Mistral(max_model_len=max_model_len)
+    elif "Llama" in llm_name:
+        llm = Llama(llm_name)
+    elif llm_name == "rule":
+        return EmptyLLM()
     else:
         raise Exception("Not Implemented")
 
