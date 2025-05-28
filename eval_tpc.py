@@ -170,7 +170,7 @@ if __name__ == "__main__":
 
 
 
-        print("Method: {}".format(method))
+        print("Method: {}".format(args.method))
 
         if not os.path.exists("eval_res/splits_{}/{}/".format(args.splits, method)):
             os.makedirs("eval_res/splits_{}/{}/".format(args.splits, method))

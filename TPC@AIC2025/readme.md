@@ -31,7 +31,8 @@ $$EPR-macro = \frac{\sum_{p\in P}\prod_{\in Env} 1_{passed(c,p)}}{|P|}$$
 条件逻辑约束评价了输出规划方案中在满足环境约束的前提下对用户个性化需求的满足程度。
 
 $$C-LPR = \frac{\sum_{p \in P} 1_{passed(Env,p)}\cdot \sum_{c\in C_p} 1_{passed(c,p)}}{\sum_{p \in P}|P|}$$
-$P$ 是输出的规划方案集合，$C_p$是方案p对应询问中的约束需求集合，$passed(c,p)$表示在p中约束c是否被满足。
+
+P是输出的规划方案集合，C_p 是方案 p 对应询问中的约束需求集合，passed(c,p) 表示在p中约束c是否被满足。
 
 ### 硬约束通过率
 硬约束通过率表达了输出规划方案中满足所有环境约束和逻辑约束的比例。
@@ -41,14 +42,17 @@ $$FPR = \frac{\sum_{p \in P} 1_{passed(Env,p)}\cdot \prod_{c\in C_p} 1_{passed(c
 TPC 比赛中，我们提供了三个旅行中常见的偏好指标：
 
 每天访问的景点数量尽可能多, Daily Average Attractions Visited, DAV，数值归一化到[0.4]作为分数
+
 $$DAV\text{-}score = (DAV - 0)/4 $$
 
 
-平均交通时间尽可能多, Averaged Transportation Time, ATT，数值归一到[15,120] (分钟)作为分数
+平均交通时间尽可能少， Averaged Transportation Time, ATT，数值归一到[15,120] (分钟)作为分数
+
 $$ATT\text{-}score = \max(\min((120-ATT)/(120-15),1),0) $$
 
 
 每天餐饮推荐数量尽可能多, Daily Dining Recommendations, DDR，数值归一到[0,3] 作为分数
+
 $$DDR\text{-}score = \min((DDR - 0)/(3-0),1) $$
 
 ### 最终得分
