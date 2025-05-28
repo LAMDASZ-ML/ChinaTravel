@@ -125,12 +125,6 @@ if __name__ == "__main__":
         print("save to {}".format(res_file))
         print("Schema Pass Rate:", schema_rate)
 
-        for idx in query_index:
-            if idx not in schema_pass_id:
-                fail_list.append(idx)
-        with open(f"{args.splits}_{args.method}_schema_fail.txt", "w") as f:
-            for uid in fail_list:
-                f.writelines(uid + "\n")
 
         macro_comm, micro_comm, common_result_agg, commonsense_pass_id = evaluate_commonsense_constraints(
             query_index, query_data, result_data[method], verbose=False
@@ -144,14 +138,6 @@ if __name__ == "__main__":
         print("micro accuracy: {}".format(micro_comm))
         print("macro accuracy: {}".format(macro_comm))
 
-        # for passid in schema_pass_id:
-        #     if passid not in commonsense_pass_id:
-        #         print("schema pass but commonsense fail: {}".format(passid))
-        #         # print(result_data[method][passid])
-        for passid in commonsense_pass_id:
-            if passid not in schema_pass_id:
-                print("commonsense pass but schema fail: {}".format(passid))
-                # print(result_data[method][passid])
 
         # print("Logical constraints (flat version):")
         # macro_logi, micro_logi, logi_result_agg, logi_pass_id_flat = evaluate_hard_constraints(
@@ -191,17 +177,6 @@ if __name__ == "__main__":
         all_pass_id = list(set(schema_pass_id) & set(commonsense_pass_id) & set(logi_pass_id))
 
 
-        # for passid in query_index:
-        #     if passid not in all_pass_id:
-        #         if passid in commonsense_pass_id and passid in logi_pass_id:
-        #             print("all_pass fail but commonsense and logical pass: {}".format(passid))
-              
-
-
-        # with open("multi_cons_ds_fail.txt","w") as f:
-        #     for uid in query_index:
-        #         if uid not in all_pass_id:
-        #             f.writelines(uid + "\n")
 
         print("All pass ratio: ", 1. * len(all_pass_id) / len(query_index) * 100)
         
