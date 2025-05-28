@@ -56,6 +56,21 @@ $$DDR\text{-}score = \min((DDR - 0)/(3-0),1) $$
 Overall Score = 10% * EPR-micro + 10% * EPR-macro + 25% * C-LPR + 40% * FPR + 5% DAV-Score + 5% ATT-Score + 5% DDR-Score
 
 
+## 环境配置
+请根据ChinaTravel代码库说明进行环境配置
+https://github.com/LAMDASZ-ML/ChinaTravel/tree/main
+
+
+## 数据配置
+
+数据集和数据索引下载：
+
+
+[![Dataset-Phase1](https://img.shields.io/badge/Dataset-Phase1-yellow)](https://box.nju.edu.cn/d/15226dffe3c14ffba983/)
+
+请将数据集解压到`chinatravel/data/`目录下。例如：`chinatravel/data/tpc_aic_phase1/`
+将数据索引放到`chinatravel/evaluation/`目录下。例如：`chinatravel/evaluation/tpc_aic_phase1.txt`
+
 
 ## 🛠️ 算法开发
 
@@ -97,7 +112,7 @@ class TPCLLM(AbstractLLM):
 
 
 ```bash
-python run_tpc.py --splits tpc_phase1 --agent TPCAgent --llm TPCLLM --oracle_translation
+python run_tpc.py --splits tpc_aic_phase1 --agent TPCAgent --llm TPCLLM --oracle_translation
 ```
 
 规划结果会保存在：`results/TPCAgent_TPCLLM_oracletranslation` 目录。
@@ -107,7 +122,7 @@ python run_tpc.py --splits tpc_phase1 --agent TPCAgent --llm TPCLLM --oracle_tra
 测试流程中，用户需要实时理解用户自然语言表达的约束需求，并自动化地给出满足约束需求的旅行方案。
 
 ```bash
-python run_tpc.py --splits tpc_phase1 --agent TPCAgent --llm TPCLLM
+python run_tpc.py --splits tpc_aic_phase1 --agent TPCAgent --llm TPCLLM
 ```
 
 
@@ -117,12 +132,12 @@ python run_tpc.py --splits tpc_phase1 --agent TPCAgent --llm TPCLLM
 
 任务1：基于符号验证器的旅行方案修正
 ```bash
-python eval_tpc.py --splits tpc_phase1 --method TPCAgent_TPCLLM_oracle_translation
+python eval_tpc.py --splits tpc_aic_phase1 --method TPCAgent_TPCLLM_oracle_translation
 ```
 
 任务2：全流程方案生成
 ```bash
-python eval_tpc.py --splits tpc_phase1 --method TPCAgent_TPCLLM
+python eval_tpc.py --splits tpc_aic_phase1 --method TPCAgent_TPCLLM
 ```
 
 ### 5. 代码和结果提交
