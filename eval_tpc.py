@@ -243,11 +243,11 @@ if __name__ == "__main__":
         scores['FPR'] = fpr
         
         pre_res=cal_default_pr_score(query_index,query_data,result_data[method],all_pass_id)
-        scores['Pre-1']=pre_res[0]
-        scores['Pre-2']=pre_res[1]
-        scores['Pre-3']=pre_res[2]
+        scores['DAV']=pre_res[0]*100
+        scores['ATT']=pre_res[1]*100
+        scores['DDR']=pre_res[2]*100
         
-        final_score=0.1*micro_comm+0.1*micro_comm+0.25*conditional_micro_logi+0.05*scores['Pre-1']+0.05*scores['Pre-1']+0.05*scores['Pre-1']+0.4*fpr
+        final_score=0.1*micro_comm+0.1*micro_comm+0.25*conditional_micro_logi+0.05*scores['DAV']+0.05*scores['ATT']+0.05*scores['DDR']+0.4*fpr
         print('Overall Score: ',final_score)
         scores['overall'] = final_score
         print(scores)
