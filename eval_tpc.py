@@ -184,7 +184,6 @@ if __name__ == "__main__":
             query_index, query_data, result_data[method], verbose=False
         )
 
-
         # print("Commonsense constraints:")
         print("Mic.EPR {}".format(micro_comm))
         scores['MicEPR'] = micro_comm

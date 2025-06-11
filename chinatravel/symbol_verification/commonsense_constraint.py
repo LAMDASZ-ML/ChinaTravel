@@ -1021,26 +1021,26 @@ def Is_space_correct(symbolic_input, plan_json, verbose=False):
                 if not "transports" in activity_i:
                     table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
                     error_info.append("There must be transport between activities in different possitions: " + str(activity_i))
-                    continue
+                    # continue
 
-                if (len(activity_i["transports"]) < 1):
+                elif (len(activity_i["transports"]) < 1):
 
                     table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
                     error_info.append("There must be transport between activities in different possitions: " + str(activity_i))
-                    continue
+                    # continue
 
-                
-                if activity_i["transports"][0]["start"] != position_list[-1]:
+                else:
+                    if activity_i["transports"][0]["start"] != position_list[-1]:
 
-                    table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
-                    error_info.append("The origin of the transport must be equal to the position of the previous activity.: " + str(activity_i))
-                    continue
+                        table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
+                        error_info.append("The origin of the transport must be equal to the position of the previous activity.: " + str(activity_i))
+                        # continue
 
-                if activity_i["transports"][-1]["end"] != position_i:
+                    if activity_i["transports"][-1]["end"] != position_i:
 
-                    table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
-                    error_info.append("The destination of the transport must be equal to the position of the current activity.: " + str(activity_i))
-                    continue
+                        table_statistics.loc[0, 'Invalid Transport information across positions'] = 1
+                        error_info.append("The destination of the transport must be equal to the position of the current activity.: " + str(activity_i))
+                        # continue
 
             if "position" in activity_i:
                 position_list.append(activity_i["position"])
