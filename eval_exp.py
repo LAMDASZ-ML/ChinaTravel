@@ -99,7 +99,7 @@ if __name__ == "__main__":
     if not os.path.exists("eval_res/splits_{}/".format(args.splits)):
         os.makedirs("eval_res/splits_{}/".format(args.splits))
     
-    fail_list = []
+
 
     for method in method_list:
 
@@ -124,7 +124,6 @@ if __name__ == "__main__":
         schema_result_agg.to_csv(res_file, index=False)
         print("save to {}".format(res_file))
         print("Schema Pass Rate:", schema_rate)
-
 
         macro_comm, micro_comm, common_result_agg, commonsense_pass_id = evaluate_commonsense_constraints(
             query_index, query_data, result_data[method], verbose=False

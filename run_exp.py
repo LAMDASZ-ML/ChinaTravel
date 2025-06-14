@@ -31,12 +31,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--skip", "-sk", type=int, default=0, help="skip if the plan exists"
     )
+    parser.add_argument('--restart_from', type=str, default=None, help='Restart Data ID')
     parser.add_argument(
         "--agent",
         "-a",
         type=str,
         default=None,
-        choices=["RuleNeSy", "LLMNeSy", "LLM-modulo", "ReAct", "Act", "TPCAgent"],
+        choices=["RuleNeSy", "LLMNeSy", "LLM-modulo", "ReAct", "ReAct0", "Act", "TPCAgent"],
     )
     parser.add_argument(
         "--llm",
@@ -48,6 +49,7 @@ if __name__ == "__main__":
     parser.add_argument('--oracle_translation', action='store_true', help='Set this flag to enable oracle translation.')
     parser.add_argument('--preference_search', action='store_true', help='Set this flag to enable preference search.')
     parser.add_argument('--refine_steps', type=int, default=10, help='Steps for refine-based method, such as LLM-modulo, Reflection')
+    
 
     args = parser.parse_args()
 
@@ -87,10 +89,16 @@ if __name__ == "__main__":
     print("res_dir: ", res_dir)
     print("log_dir:", log_dir)
 
+    if args.agent in ["LLM-modulo"]:
+        max_model_len = 65536
+    elif args.agent in ["LLMNeSy"]:
+        max_model_len = 8192
+    else:
+        max_model_len = None
     kwargs = {
         "method": args.agent,
         "env": WorldEnv(),
-        "backbone_llm": init_llm(args.llm),
+        "backbone_llm": init_llm(args.llm, max_model_len=max_model_len),
         "cache_dir": cache_dir,
         "log_dir": log_dir, 
         "debug": True,
@@ -104,6 +112,10 @@ if __name__ == "__main__":
     succ_count, eval_count = 0, 0
 
     for i, data_idx in enumerate(query_index):
+        if (args.restart_from is not None) and (data_idx != args.restart_from):
+            continue
+        else:
+            args.restart_from = None
 
         sys.stdout = sys.__stdout__
         print("------------------------------")
@@ -121,14 +133,17 @@ if __name__ == "__main__":
         eval_count += 1
         query_i = query_data[data_idx]
         print(query_i)
-        if args.agent in ["ReAct", "Act"]:
+        if args.agent in ["ReAct", "ReAct0", "Act"]:
             plan_log = agent(query_i["nature_language"])
             plan = plan_log["ans"]
             if isinstance(plan, str):
                 try:
                     plan = json.loads(plan)
                 except:
-                    plan = plan
+                    plan = {"plan": plan}
+            plan["input_token_count"] = agent.backbone_llm.input_token_count
+            plan["output_token_count"] = agent.backbone_llm.output_token_count
+            plan["input_token_maxx"] = agent.backbone_llm.input_token_maxx
             log = plan_log["log"]
             save_json_file(
                 json_data=log, file_path=os.path.join(log_dir, f"{data_idx}.json")

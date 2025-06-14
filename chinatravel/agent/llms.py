@@ -19,6 +19,18 @@ project_root_path = os.path.dirname(
 if project_root_path not in sys.path:
     sys.path.insert(0, project_root_path)
 
+def chat_template(messages):
+    """
+    将 messages 列表转成符合 Chat 模板格式的字符串
+    用于 tiktoken.encode 计算 token 数。
+    """
+    formatted = ""
+    for msg in messages:
+        role = msg["role"]
+        content = msg["content"]
+        formatted += f"<|{role}|>\n{content}\n"
+    formatted += "<|assistant|>\n"  # 留空表示用户希望 assistant 继续回复
+    return formatted
 
 def merge_repeated_role(messages):
     ptr = len(messages) - 1
@@ -154,7 +166,7 @@ class GPT4o(AbstractLLM):
     def _send_request(self, messages, kwargs):
 
         # print(messages)
-        tokens = self.tokenizer.encode(messages[-1]["content"])
+        tokens = self.tokenizer.encode(chat_template(messages))
         self.input_token_count += len(tokens)
         self.input_token_maxx = max(self.input_token_maxx, len(tokens))
 
@@ -437,7 +449,9 @@ class Llama(AbstractLLM):
                 res_str = res_str.split("\n")[0]
         except Exception as e:
             res_str = '{"error": "Request failed, please try again."}'
-
+        # print("---mistral_output---")
+        # print(res_str)
+        # print("---mistral_output_end---")
         print(res_str)
         return res_str
 

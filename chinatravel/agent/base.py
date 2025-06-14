@@ -70,15 +70,15 @@ class AbstractAgent(ABC):
         self._log = None
 
     def __call__(self, query):
-
+        self._reset()  # Default reset, reset env, ans and log
+        self.reset()  # Reset the agent, just those added in the subclass
+        
         return_info = self.run(query)
 
         if not isinstance(return_info, AgentReturnInfo):
             raise AgentReturnError(
                 "Return value must be an instance of AgentReturnInfo"
             )
-        self._reset()  # Default reset, reset env, ans and log
-        self.reset()  # Reset the agent, just those added in the subclass
 
         return return_info
 

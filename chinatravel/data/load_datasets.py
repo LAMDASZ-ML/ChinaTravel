@@ -95,16 +95,24 @@ def save_json_file(json_data, file_path):
 
 def load_query(args):
     
-    if not args.splits in ["easy", "medium", "human"]:
+    if not args.splits in ["easy", "medium", "human", "preference_base50",
+                           "preference0_base50", "preference1_base50", "preference2_base50",
+                           "preference3_base50", "preference4_base50", "preference5_base50"]:
         return load_query_local(args)
-
-    query_data = hg_load_dataset("LAMDA-NeSy/ChinaTravel")[args.splits].to_list()
+    config_name = "default"
+    if args.splits in ["preference0_base50", "preference1_base50", "preference2_base50",
+                       "preference3_base50", "preference4_base50", "preference5_base50"]:
+        config_name = "preference"
+    # elif args.splits in ["human"]:
+    #     config_name = "validation"
+    # elif args.splits in ["human1000"]:
+    #     config_name = "test"
+    query_data = hg_load_dataset("LAMDA-NeSy/ChinaTravel", name=config_name)[args.splits].to_list()
     
 
     for data_i in query_data:
-        data_i["hard_logic_py"] = ast.literal_eval(data_i["hard_logic_py"])
-
-
+        if "hard_logic_py" in data_i:
+            data_i["hard_logic_py"] = ast.literal_eval(data_i["hard_logic_py"])
     
     query_id_list = [data_i["uid"] for data_i in query_data]
     data_dict = {}

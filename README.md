@@ -28,6 +28,14 @@ Participants are invited to develop novel agents that can tackle real-world trav
 
 ## 📝 ChangeLog
 
+### 2025.06
+
+1. Fix error collection in the evaluation code of commonsense. 
+2. Fix pure-neuro agent's pipeline
+3. Fix load_datasets from huggingface
+4. Update exception handling in syntax verification
+
+
 ### 2025.05
 
 1. Update logs for the latest version.

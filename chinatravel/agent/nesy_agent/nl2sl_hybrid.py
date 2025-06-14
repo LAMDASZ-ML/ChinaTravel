@@ -310,7 +310,11 @@ def check(query):
     run_error_list = []
     run_error_idx = []
     hard_logic_py = query["hard_logic_py"]
-    print(query["days"])
+    
+    if query["days"] not in EXAMPLE_PLANS:
+        print("Error: days should be in [1, 2, 3, 4, 5, 6]")
+        return [], []
+    
     example_plan = EXAMPLE_PLANS[query["days"]]
     for idx, constraint in enumerate(hard_logic_py):
         vars_dict = deepcopy(func_dict)
@@ -492,14 +496,15 @@ def nl2sl_reflect(query, backbone_llm):
         "南京",
         "苏州",
     ]
-    if query["target_city"] not in city_list or query["start_city"] not in city_list:
-        query["hard_logic"] = []
-        query["hard_logic_py"] = []
-        query["ood"] = True
-        return query
-    checker = HardLogicPyChecker(query["target_city"])
+    if "target_city" in query and "start_city" in query:
+        if query["target_city"] not in city_list or query["start_city"] not in city_list:
+            query["hard_logic"] = []
+            query["hard_logic_py"] = []
+            query["ood"] = True
+            return query
     query = nl2sl_step1(query, backbone_llm)
     query = nl2sl_step2(query, backbone_llm)
+    checker = HardLogicPyChecker(query["target_city"])
     query = nl2sl_step3(query, backbone_llm, checker)
     query["hard_logic_py_iter_3"] = query["hard_logic_py"] 
 

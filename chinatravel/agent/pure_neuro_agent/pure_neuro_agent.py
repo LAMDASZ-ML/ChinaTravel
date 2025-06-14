@@ -64,6 +64,9 @@ class ActAgent(AbstractAgent):
         self.notebook.reset()
         self.next_page_cnt = 0
         self.notedown_cnt = 0
+        self.backbone_llm.input_token_count = 0
+        self.backbone_llm.output_token_count = 0
+        self.backbone_llm.input_token_maxx = 0
 
     def run(self, query):
         self.reset()
