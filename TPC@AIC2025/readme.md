@@ -115,35 +115,22 @@ class TPCLLM(AbstractLLM):
 完成智能体算法开发后，你可以使用实验脚本运行你的代码。
 
 
-任务1：基于符号验证器的旅行方案修正
-测试流程中提供对用户需求的领域特定语言描述和符号验证器，用户在测试时可以通过该验证器对方案进行校验，实时修正方案。
-
-
-```bash
-python run_tpc.py --splits tpc_aic_phase1 --agent TPCAgent --llm TPCLLM --oracle_translation
-```
-
-规划结果会保存在：`results/TPCAgent_TPCLLM_oracletranslation` 目录。
-
-
-任务2：全流程方案生成
+任务：全流程方案生成
 测试流程中，用户需要实时理解用户自然语言表达的约束需求，并自动化地给出满足约束需求的旅行方案。
 
 ```bash
 python run_tpc.py --splits tpc_aic_phase1 --agent TPCAgent --llm TPCLLM
 ```
+规划结果会保存在：`results/TPCAgent_TPCLLM` 目录。
+
+请注意算法推理时禁止使用--oracle_translation使用DSL标注信息，DSL标注信息仅供用于本地测试评估。
 
 
 ### 4. 本地结果获取
 
 本地评估代码在`eval_tpc.py`文件中提供。你可以使用以下命令运行评估代码：
 
-任务1：基于符号验证器的旅行方案修正
-```bash
-python eval_tpc.py --splits tpc_aic_phase1 --method TPCAgent_TPCLLM_oracle_translation
-```
-
-任务2：全流程方案生成
+全流程方案生成
 ```bash
 python eval_tpc.py --splits tpc_aic_phase1 --method TPCAgent_TPCLLM
 ```
@@ -152,10 +139,6 @@ python eval_tpc.py --splits tpc_aic_phase1 --method TPCAgent_TPCLLM
 
 代码压缩包 XXX_code.zip：请将`chinatravel/agent/tpc_agent/`压缩提交。
 
-（任务1）
-结果压缩包 XXX_code.zip：请将`chinatravel/results/TPCAgent_TPCLLM_oracletranslation/`压缩提交。
-
-（任务2）
 结果压缩包 XXX_code.zip：请将`chinatravel/results/TPCAgent_TPCLLM/`压缩提交。
 
 ### 6. 官方评测 （复赛、决赛）
