@@ -71,9 +71,9 @@ https://github.com/LAMDASZ-ML/ChinaTravel/tree/main
 数据集和数据索引下载：
 
 
-[![Dataset-Phase1](https://img.shields.io/badge/Dataset-Phase1-yellow)](https://box.nju.edu.cn/d/15226dffe3c14ffba983/)
+[![Dataset-Phase1](https://img.shields.io/badge/Dataset-Phase1-yellow)](https://box.nju.edu.cn/d/be342d7958a44fb2ab35/)
 
-密码：TPC@AIC2025
+请在官网报名注册后获取访问密码
 
 
 请将数据集解压到`chinatravel/data/`目录下。例如：`chinatravel/data/tpc_aic_phase1/`
