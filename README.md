@@ -66,7 +66,7 @@ pip install -r requirements.txt
 
 2. Download the database and unzip it to the "chinatravel/environment/" directory
 
-Download Links: [Google Drive](https://drive.google.com/file/d/1clPy2N5Q8ag0HZIOeMpffmFgWbZD8R-8/view?usp=sharing), [NJU Drive](https://box.nju.edu.cn/f/2473be4dd4164225ab7c/)
+Download Links: [Google Drive](https://drive.google.com/drive/folders/1bJ7jA5cfExO_NKxKfi9qgcxEbkYeSdAU), [NJU Drive](https://box.nju.edu.cn/d/dd83e5a4a9e242ed8eb4/)
 
 3. Download the open-source LLMs (optional).
 
