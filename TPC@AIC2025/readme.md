@@ -77,7 +77,7 @@ https://github.com/LAMDASZ-ML/ChinaTravel/tree/main
 
 
 请将数据集解压到`chinatravel/data/`目录下。例如：`chinatravel/data/tpc_aic_phase1/`
-将数据索引放到`chinatravel/evaluation/`目录下。例如：`chinatravel/evaluation/tpc_aic_phase1.txt`
+将数据索引放到`chinatravel/evaluation/default_splits`目录下。例如：`chinatravel/evaluation/default_splits/tpc_aic_phase1.txt`
 
 
 ## 🛠️ 算法开发
