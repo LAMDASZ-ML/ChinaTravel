@@ -389,7 +389,8 @@ def Is_attractions_correct(symbolic_input, plan_json, verbose=False):
                 activity_i["start_time"]
                 activity_i["end_time"]
 
-                if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
+                # if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
+                if not (time_compare_if_earlier_equal(opentime, activity_i["start_time"]) and time_compare_if_earlier_equal(activity_i["end_time"], endtime)):
                     # return return_info(False, "The attraction is closed now. {}, open time: [{} -- {}]".format(activity_i["position"], opentime, endtime))
                     table_statistics.loc[0,  'Visiting attraction in their closed time'] = 1
                     error_info.append("The attraction is closed now. {}, open time: [{} -- {}]".format(activity_i["position"], opentime, endtime))
@@ -655,7 +656,8 @@ def Is_restaurants_correct(symbolic_input, plan_json, verbose=False):
             try:
                 activity_i["start_time"]
                 activity_i["end_time"]
-                if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
+                # if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
+                if not (time_compare_if_earlier_equal(opentime, activity_i["start_time"]) and time_compare_if_earlier_equal(activity_i["end_time"], endtime)):
                     table_statistics.loc[0,  'Visiting Restruants in their closed time'] = 1
                     error_info.append("The attraction is closed now. open time: [{} -- {}]".format(opentime, endtime))
             except:

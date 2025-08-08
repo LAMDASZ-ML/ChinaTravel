@@ -331,7 +331,8 @@ def collect_attractions_error(symbolic_input, plan_json, verbose=False):
                 activity_i["start_time"]
                 activity_i["end_time"]
 
-                if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
+                # if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
+                if not (time_compare_if_earlier_equal(opentime, activity_i["start_time"]) and time_compare_if_earlier_equal(activity_i["end_time"], endtime)):
                     error_info.append(f"The attraction, {activity_i['position']} in day {day_i+1}, is closed when you visiting. Its open time is [{opentime} -- {endtime}]")
                 
             except:
@@ -580,7 +581,8 @@ def collect_restaurants_error(symbolic_input, plan_json, verbose=False):
             try:
                 activity_i["start_time"]
                 activity_i["end_time"]
-                if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
+                # if time_compare_if_earlier_equal(endtime, activity_i["start_time"]) or time_compare_if_earlier_equal(activity_i["end_time"], opentime): 
+                if not (time_compare_if_earlier_equal(opentime, activity_i["start_time"]) and time_compare_if_earlier_equal(activity_i["end_time"], endtime)):
                     # table_statistics.loc[0,  'Visiting Restruants in their closed time'] = 1
                     error_info.append(f"The restaurant, {activity_i['position']} in day {day_i+1}, is closed when you visiting. Its open time is [{opentime} -- {endtime}]")
                 
