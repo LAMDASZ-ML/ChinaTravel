@@ -326,7 +326,8 @@ def collect_attractions_error(symbolic_input, plan_json, verbose=False):
             
             # 开放时间
             opentime, endtime = select_attraction["opentime"].values[0],  select_attraction["endtime"].values[0]
-
+            if time_compare_if_earlier_equal(endtime, opentime):
+                endtime = str(int(endtime.split(":")[0]) + 24) + ":" + endtime.split(":")[1]
             try: 
                 activity_i["start_time"]
                 activity_i["end_time"]
@@ -578,6 +579,8 @@ def collect_restaurants_error(symbolic_input, plan_json, verbose=False):
             
             # 开放时间
             opentime, endtime = select_restaurant["opentime"].values[0],  select_restaurant["endtime"].values[0]
+            if time_compare_if_earlier_equal(endtime, opentime):
+                endtime = str(int(endtime.split(":")[0]) + 24) + ":" + endtime.split(":")[1]
             try:
                 activity_i["start_time"]
                 activity_i["end_time"]
