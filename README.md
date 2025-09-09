@@ -28,7 +28,7 @@ Participants are invited to develop novel agents that can tackle real-world trav
 
 ## 📝 ChangeLog
 
-### 2025.05
+### 2025.09
 1. Upload the champion solution of TPC@IJCAI2025 DSL track. Thanks the [@evergreenee](https://github.com/evergreenee) for their contributions.  
 
 
