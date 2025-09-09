@@ -28,6 +28,10 @@ Participants are invited to develop novel agents that can tackle real-world trav
 
 ## 📝 ChangeLog
 
+### 2025.05
+1. Upload the champion solution of TPC@IJCAI2025 DSL track. Thanks the [@evergreenee](https://github.com/evergreenee) for their contributions.  
+
+
 ### 2025.06
 
 1. Fix error collection in the evaluation code of commonsense. 
@@ -71,7 +75,7 @@ Download Links: [Google Drive](https://drive.google.com/drive/folders/1bJ7jA5cfE
 3. Download the open-source LLMs (optional).
 
 ```bash
-bash download_llms.sh
+bash download_llm.sh
 ```
 
 4. Download the tokenizers.
