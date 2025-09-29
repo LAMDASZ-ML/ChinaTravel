@@ -20,7 +20,7 @@ from chinatravel.evaluation.commonsense_constraint import evaluate_commonsense_c
 from chinatravel.evaluation.hard_constraint import evaluate_hard_constraints, evaluate_hard_constraints_v2
 from chinatravel.evaluation.preference import evaluate_preference, evaluate_preference_v2
 
-
+geat
 METHOD_LIST = [
     "example" "act_Deepseek_zeroshot",
     "act_GPT4o_zeroshot",
