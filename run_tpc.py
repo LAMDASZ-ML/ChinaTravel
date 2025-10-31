@@ -5,6 +5,7 @@ import numpy as np
 import sys
 import os
 import json
+from func_timeout import func_timeout, FunctionTimedOut
 
 project_root_path = os.path.dirname(os.path.abspath(__file__))
 if project_root_path not in sys.path:
@@ -44,7 +45,14 @@ if __name__ == "__main__":
         type=str,
         default=None
     )
-    
+    parser.add_argument(
+        "--timeout",
+        "-t",
+        type=int,
+        default=300,
+        help="Timeout in seconds for each query",
+    )
+
     parser.add_argument('--oracle_translation', action='store_true', help='Set this flag to enable oracle translation.')
 
     args = parser.parse_args()
@@ -93,9 +101,6 @@ if __name__ == "__main__":
     }
     agent = init_agent(kwargs)
 
-
-
-
     succ_count, eval_count = 0, 0
 
     for i, data_idx in enumerate(query_index):
@@ -114,8 +119,23 @@ if __name__ == "__main__":
         eval_count += 1
         query_i = query_data[data_idx]
         print(query_i)
-        
-        succ, plan = agent.run(query_i, prob_idx=data_idx, oralce_translation=args.oracle_translation)
+        try:
+            # succ, plan = agent.run(query_i, prob_idx=data_idx, oralce_translation=args.oracle_translation)
+            succ, plan = func_timeout(
+                args.timeout,
+                agent.run,
+                args=(query_i,),
+                kwargs=dict(
+                    prob_idx=data_idx, oralce_translation=args.oracle_translation
+                ),
+            )
+        except FunctionTimedOut:
+            # print(f"⚠️ 任务 {data_idx} 超过 {args.timeout}s 被中断。")
+            succ, plan = 0, {"error": f"timeout after {args.timeout}s"}
+
+        except Exception as e:
+            # print(f"❌ 执行任务 {data_idx} 出错: {e}")
+            succ, plan = 0, {"error": str(e)}
 
         if succ:
             succ_count += 1

@@ -48,7 +48,7 @@
                 "position": {
                   "type": "string"
                 },
-                "transport": {
+                "transports": {
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -61,7 +61,11 @@
                       },
                       "mode": {
                         "type": "string",
-                        "enum": ["walk", "metro", "car"]
+                        "enum": [
+                          "walk",
+                          "metro",
+                          "taxi"
+                        ]
                       },
                       "start_time": {
                         "type": "string",
@@ -107,9 +111,6 @@
                 },
                 "TrainID": {
                   "type": "string"
-                },
-                "transports": {
-                  "type": "array"
                 }
               },
               "required": [
@@ -117,7 +118,8 @@
                 "start_time",
                 "end_time",
                 "cost",
-                "price"
+                "price",
+                "transports"
               ],
               "allOf": [
                 {

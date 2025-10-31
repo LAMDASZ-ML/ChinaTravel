@@ -39,13 +39,16 @@
                 "cost": {
                   "type": "number"
                 },
+                "price": {
+                  "type": "number"
+                },
                 "tickets": {
                   "type": "integer"
                 },
                 "position": {
                   "type": "string"
                 },
-                "transport": {
+                "transports": {
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -58,7 +61,11 @@
                       },
                       "mode": {
                         "type": "string",
-                        "enum": ["walk", "metro", "car"]
+                        "enum": [
+                          "walk",
+                          "metro",
+                          "taxi"
+                        ]
                       },
                       "start_time": {
                         "type": "string",
@@ -69,6 +76,9 @@
                         "pattern": "^\\d{2}:\\d{2}$"
                       },
                       "cost": {
+                        "type": "number"
+                      },
+                      "price": {
                         "type": "number"
                       },
                       "distance": {
@@ -84,6 +94,7 @@
                       "mode",
                       "start_time",
                       "end_time",
+                      "price",
                       "cost",
                       "distance"
                     ]
@@ -100,16 +111,15 @@
                 },
                 "TrainID": {
                   "type": "string"
-                },
-                "transports": {
-                  "type": "array"
                 }
               },
               "required": [
                 "type",
                 "start_time",
                 "end_time",
-                "cost"
+                "cost",
+                "price",
+                "transports"
               ],
               "allOf": [
                 {
