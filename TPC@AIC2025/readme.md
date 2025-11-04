@@ -137,14 +137,33 @@ python eval_tpc.py --splits tpc_aic_phase1 --method TPCAgent_TPCLLM
 
 ### 5. 代码和结果提交
 
-代码压缩包 XXX_code.zip：请将`chinatravel/agent/tpc_agent/`压缩提交。
 
 结果压缩包 XXX_code.zip：请将`chinatravel/results/TPCAgent_TPCLLM/`压缩提交。
+
+
+代码压缩包 XXX_code.zip：请将`chinatravel/agent/tpc_agent/`压缩提交。
+
+#### 代码提交细则
+**在提交代码前，请在本地验证，确保你的算法能正确载入模型权重、正确运行、在results文件夹中能顺利生成结果plan的json文件。**
+- 只能打包 `chinatravel/agent/tpc_agent/` 目录内的部分，你的所有代码、模型都应放在这个目录下。官方进行代码复测时，会将你的算法文件夹直接解压到这个位置，这个文件夹外的部分都与当前 chinatravel 给出的代码一致。所以在验证你代码的可复现性时，请保证外部代码不变。
+- 模型问题，官方代码复测仅支持离线模型，如果你需要使用Qwen等开源模型，请将对应模型权重下载放在你的算法目录中，即`chinatravel/agent/tpc_agent/`，并检查可以被你正确调用。你可以在 `chinatravel/agent/tpc_agent/tpc_llm.py` 中指定你的模型权重目录，请确保该位置在你的算法目录，即 `chinatravel/agent/tpc_agent/`，下，例如：`path = os.path.join(project_root_path, "chinatravel", "agent", "tpc_agent", "local_llm", "Qwen3")`。
+- 如果你需要使用到与当前环境不一致的python包，请将相应的python包离线下载到你的算法目录（`chinatravel/agent/tpc_agent/`）中，并通过源代码载入的方式进行使用。
+- 在线代码复核推理命令：`python run_exp.py --splits tpc_phase_2_online_test --agent TPCAgent --llm TPCLLM`
+- 在线代码复核评估命令：`python eval_tpc.py --splits tpc_phase_2_online_test --method TPCAgent_TPCLLM`
+- 请保障你的提交的文件被正确命名和组织：
+  - 压缩包名：队伍参赛编号_code.zip，例如 `AIC-2025-XXXXXXXX.zip`。
+  - 压缩包中第一层为，命名为 `tpc_agent` 的文件夹 和一个命名为 `contact.txt` 的联系方式。
+  - `tpc_agent` 文件夹中为运行你算法需要的所有内容。
+  - `contact.txt` 中包含必要的参赛队伍联系方式，包括队伍参赛编号、团队名称、联系方式（邮箱）
+- 提交文件解压后大小必须在40G内
+  
+**再次重申：在提交代码前，请在本地验证，确保你的算法能正确载入模型权重、正确运行、在results文件夹中能顺利生成结果plan的json文件。**
 
 ### 6. 官方评测 （复赛、决赛）
 
 - 官方验证将在离线设备上进行，该设备配置为：14核Xeon(R) Gold 6348 CPU，100GB RAM，A800-80GB GPU，50GB SSD，驱动程序：550.54.14，CUDA：12.4。
 - 算法需要快速响应用户请求，官方评估期间，每个查询将分配5分钟的推理时间，如果超出时间限制，系统将跳至下一个查询。请合理设计你的算法，或使用计时机制在给定的计算资源内完成规划。
+  - 我们在 run_tpc.py 中给出了限时机制的实现。
 - 评估将以离线方式进行，如果你的算法需要使用大型语言模型（LLM），请使用开源模型，例如Qwen3-8B/4B、Llama 3.1-8B等。避免使用外部API，例如DeepSeek API、GPT API等。
 - 我们将重复评估五次，取总分的平均值作为最终结果。如果最终结果与用户提交的结果存在显著差异，我们将联系参与者进行确认。无法重现结果的参赛队伍将被取消资格。
 
